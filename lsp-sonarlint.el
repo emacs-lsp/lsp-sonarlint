@@ -42,7 +42,10 @@
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-sonarlint-server-path
-  "/home/fermin/Programming/sonarlint-lsp/sonarlint-server.jar"
+  (concat
+   (file-name-directory load-file-name)
+   "server/sonarlint-server.jar")
+  ;; "/home/fermin/Programming/sonarlint-lsp/sonarlint-server.jar"
  "Sonarlint language server location."
  :group 'lsp-sonarlint
  :type 'file)
