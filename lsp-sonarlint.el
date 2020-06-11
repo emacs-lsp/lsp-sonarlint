@@ -117,12 +117,31 @@
   :type 'file)
 
 
+
+(defgroup lsp-sonarlint-javascript nil
+  "Sonarlint python analyzer group"
+  :group 'lsp-sonarlint)
+
+(defcustom lsp-sonarlint-javascript-files-extension '("js")
+  "Sonarlint python file extensions."
+  :group 'lsp-sonarlint-javascript
+  :type 'list)
+
+(defcustom lsp-sonarlint-javascript-analyzer-path
+  "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarjs.jar"
+  "Sonarlint python analyzer location."
+  :group 'lsp-sonarlint-javascript
+  :type 'file)
+
+
+
 (defun lsp-sonarlint-server-start-fun (port)
   "Define serenata start function, it requires a PORT."
   `("java" "-jar" ,(eval  lsp-sonarlint-server-path )  ,(number-to-string port)
-    ,(concat "file:///" lsp-sonarlint-html-analyzer-path " ")
-    ,(concat "file:///" lsp-sonarlint-php-analyzer-path " ")
-    ,(concat "file:///" lsp-sonarlint-python-analyzer-path " ")))
+    ,(concat "file://" lsp-sonarlint-html-analyzer-path " ")
+    ,(concat "file://" lsp-sonarlint-php-analyzer-path " ")
+    ,(concat "file://" lsp-sonarlint-python-analyzer-path " ")
+    ,(concat "file://" lsp-sonarlint-javascript-analyzer-path)))
 
 
 (lsp-register-custom-settings
