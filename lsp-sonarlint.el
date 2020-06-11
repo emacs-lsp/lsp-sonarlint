@@ -6,7 +6,7 @@
 ;; Created: 13 Jun 2020
 ;; Version: 0.0.1
 ;; Keywords: languages
-;; URL:
+;; URL: https://gitlab.com/sasanidas/lsp-sonarlint
 ;; Package-Requires: ((emacs "25") (dash "2.12.0") (lsp-mode "6.3"))
 ;; License: GPL-3.0-or-later
 
