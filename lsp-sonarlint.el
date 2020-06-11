@@ -151,7 +151,7 @@
 (lsp-register-client
  (make-lsp-client
   :new-connection (lsp-tcp-server-command 'lsp-sonarlint-server-start-fun)
-  :major-modes '(php-mode html-mode web-mode js-mode j2-mode python-mode)
+  :major-modes '(php-mode html-mode web-mode js-mode js2-mode python-mode)
   :priority -1
   :multi-root t
   :add-on? t
