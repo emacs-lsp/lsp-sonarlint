@@ -7,7 +7,7 @@
 ;; Version: 0.0.1
 ;; Keywords: languages
 ;; URL:
-;; Package-Requires: ((emacs "25") (dash "2.12.0"))
+;; Package-Requires: ((emacs "25") (dash "2.12.0") (lsp-mode "6.3"))
 ;; License: GPL-3.0-or-later
 
 ;; This program is free software; you can redistribute it and/or modify
