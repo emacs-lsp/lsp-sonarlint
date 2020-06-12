@@ -18,7 +18,7 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Especific configuration for the sonarlint ruby plugin.
+;; Especific configuration for the sonarlint python plugin.
 
 ;; This is NOT and official Sonarlint extension.
 
