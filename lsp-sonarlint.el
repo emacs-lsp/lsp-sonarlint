@@ -148,24 +148,6 @@
   :type 'file)
 
 
-
-(defgroup lsp-sonarlint-css nil
-  "lsp-sonarlint css analyzer group"
-  :group 'lsp-sonarlint)
-
-(defcustom lsp-sonarlint-css-enabled t
-  "Lps-sonarlint css analyzer option."
-  :group 'lsp-sonarlint-css
-  :type 'boolean)
-
-(defcustom lsp-sonarlint-css-analyzer-path
-  "/mnt/Documentos/Descargas/sonar-css.jar"
-  "Lsp-sonarlint css analyzer location."
-  :group 'lsp-sonarlint-css
-  :type 'file)
-
-
-
 (defun lsp-sonarlint-server-start-fun (port)
   "Lsp-sonarlint start function, it need PORT as parameter."
   (-non-nil
@@ -183,10 +165,7 @@
 	 (concat "file://" lsp-sonarlint-javascript-analyzer-path " "))
 
     ,(when lsp-sonarlint-java-enabled
-       (concat "file://" lsp-sonarlint-java-analyzer-path " " ))
-
-    ,(when lsp-sonarlint-css-enabled
-       (concat "file://" lsp-sonarlint-css-analyzer-path )))))
+       (concat "file://" lsp-sonarlint-java-analyzer-path )))))
 
 
 (lsp-register-custom-settings
