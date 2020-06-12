@@ -41,10 +41,16 @@
   :link '(url-link "https://gitlab.com/sasanidas/lsp-sonarlint")
   :package-version '(lsp-mode . "6.4"))
 
+;; (defcustom lsp-sonarlint-server-path
+;;   (concat
+;;    (file-name-directory load-file-name)
+;;    "server/sonarlint-language-server.jar")
+;;  "Lsp-sonarlint language server location."
+;;  :group 'lsp-sonarlint
+;;  :type 'file)
+
 (defcustom lsp-sonarlint-server-path
-  (concat
-   (file-name-directory load-file-name)
-   "server/sonarlint-language-server.jar")
+   "/home/fermin/Programming/lsp-sonarlint/server/sonarlint-language-server.jar"
  "Lsp-sonarlint language server location."
  :group 'lsp-sonarlint
  :type 'file)
@@ -65,107 +71,38 @@
   :group 'lsp-sonarlint
   :type 'string)
 
+;;TODO This can be separated in 2 functions
+(defun lsp-sonarlint--plugin-list ()
+  "Check for the enabled extensions and return a path list.
+If the analyzer path is not a file, it ask for download the
+analyzer"
+  (let* ((lsp-sonarlint--enabled-plugins
+	  (-filter (lambda (member)
+		     (when (eval
+			    (intern (concat (format "%s" (car member) ) "-enabled")))
+		       t))
+		   (custom-group-members 'lsp-sonarlint t))))
 
-(defgroup lsp-sonarlint-php nil
-  "Lsp-sonarlint php analyzer group"
-  :group 'lsp-sonarlint)
+    (-map (lambda (enabled-member)
+	    (let* ((enabled-member--download-url
+		    (eval (intern (concat (format "%s" (car enabled-member) ) "-download-url"))))
+		   (enabled-member--analyzer-path
+		    (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path")))))
+	      (progn
+		(when (not (file-exists-p
+			   enabled-member--analyzer-path))
+		 (when (yes-or-no-p "Unable to find an enable language analyzer. Download and install the analyzer?")
+		   (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))
 
-(defcustom lsp-sonarlint-php-enabled t
-  "Lps-sonarlint php analyzer option."
-  :group 'lsp-sonarlint-php
-  :type 'boolean)
-
-(defcustom lsp-sonarlint-php-analyzer-path
-  "/mnt/Documentos/Descargas/sonar-php.jar"
-  "Lsp-sonarlint php analyzer location."
-  :group 'lsp-sonarlint-php
-  :type 'file)
-
-
-
-(defgroup lsp-sonarlint-html nil
-  "Lsp-sonarlint html analyzer group"
-  :group 'lsp-sonarlint)
-
-(defcustom lsp-sonarlint-html-enabled t
-  "Lps-sonarlint html analyzer option."
-  :group 'lsp-sonarlint-html
-  :type 'boolean)
-
-(defcustom lsp-sonarlint-html-analyzer-path
-  "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonar-html.jar"
-  "Lsp-sonarlint html analyzer location."
-  :group 'lsp-sonarlint-html
-  :type 'file)
-
-
-
-(defgroup lsp-sonarlint-python nil
-  "lsp-sonarlint python analyzer group"
-  :group 'lsp-sonarlint)
-
-(defcustom lsp-sonarlint-python-enabled t
-  "Lps-sonarlint python analyzer option."
-  :group 'lsp-sonarlint-python
-  :type 'boolean)
-
-(defcustom lsp-sonarlint-python-analyzer-path
-  "/mnt/Documentos/Descargas/sonar-python.jar"
-  "Lsp-sonarlint python analyzer location."
-  :group 'lsp-sonarlint-python
-  :type 'file)
-
-
-(defgroup lsp-sonarlint-javascript nil
-  "lsp-sonarlint javascript analyzer group"
-  :group 'lsp-sonarlint)
-
-(defcustom lsp-sonarlint-javascript-enabled t
-  "Lps-sonarlint javascript analyzer option."
-  :group 'lsp-sonarlint-javascript
-  :type 'boolean)
-
-(defcustom lsp-sonarlint-javascript-analyzer-path
-  "/mnt/Documentos/Descargas/sonar-javascript.jar"
-  "Lsp-sonarlint javascript analyzer location."
-  :group 'lsp-sonarlint-javascript
-  :type 'file)
-
-
-(defgroup lsp-sonarlint-java nil
-  "lsp-sonarlint java analyzer group"
-  :group 'lsp-sonarlint)
-
-(defcustom lsp-sonarlint-java-enabled t
-  "Lps-sonarlint java analyzer option."
-  :group 'lsp-sonarlint-java
-  :type 'boolean)
-
-(defcustom lsp-sonarlint-java-analyzer-path
-  "/mnt/Documentos/Descargas/sonar-java.jar"
-  "Lsp-sonarlint java analyzer location."
-  :group 'lsp-sonarlint-java
-  :type 'file)
+	       (concat "file://"  enabled-member--analyzer-path" "))))
+	  lsp-sonarlint--enabled-plugins)))
 
 
 (defun lsp-sonarlint-server-start-fun (port)
   "Lsp-sonarlint start function, it need PORT as parameter."
-  (-non-nil
-  `("java" "-jar" ,(eval  lsp-sonarlint-server-path )  ,(number-to-string port)
-    ,(when lsp-sonarlint-php-enabled
-	 (concat "file://" lsp-sonarlint-php-analyzer-path " "))
-
-    ,(when lsp-sonarlint-html-enabled
-	 (concat "file://" lsp-sonarlint-html-analyzer-path " "))
-
-    ,(when lsp-sonarlint-python-enabled
-	 (concat "file://" lsp-sonarlint-python-analyzer-path " "))
-
-    ,(when lsp-sonarlint-javascript-enabled
-	 (concat "file://" lsp-sonarlint-javascript-analyzer-path " "))
-
-    ,(when lsp-sonarlint-java-enabled
-       (concat "file://" lsp-sonarlint-java-analyzer-path )))))
+  (-concat
+   `("java" "-jar" ,(eval  lsp-sonarlint-server-path )  ,(number-to-string port))
+   (lsp-sonarlint--plugin-list)))
 
 
 (lsp-register-custom-settings
@@ -175,7 +112,7 @@
 (lsp-register-client
  (make-lsp-client
   :new-connection (lsp-tcp-server-command 'lsp-sonarlint-server-start-fun)
-  :major-modes '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode css-mode)
+  :major-modes '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode css-mode ruby-mode)
   :priority -1
   :multi-root t
   :add-on? t
