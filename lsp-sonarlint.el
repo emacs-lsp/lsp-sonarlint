@@ -76,7 +76,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-php-analyzer-path
-  "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarphp.jar"
+  "/mnt/Documentos/Descargas/sonar-php.jar"
   "Lsp-sonarlint php analyzer location."
   :group 'lsp-sonarlint-php
   :type 'file)
