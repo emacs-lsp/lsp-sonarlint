@@ -93,7 +93,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-html-analyzer-path
-  "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarhtml.jar"
+  "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonar-html.jar"
   "Lsp-sonarlint html analyzer location."
   :group 'lsp-sonarlint-html
   :type 'file)
