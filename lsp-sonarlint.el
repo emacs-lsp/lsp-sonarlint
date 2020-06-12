@@ -50,6 +50,11 @@
  :group 'lsp-sonarlint
  :type 'file)
 
+(defcustom lsp-sonarlint-modes-enabled '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode css-mode ruby-mode)
+  "Lsp-sonarlint activation modes."
+  :group 'lsp-sonarlint
+  :type 'file)
+
 (defcustom lsp-sonarlint-disable-telemetry t
   "Lsp-sonarlint telemetry option."
   :group 'lsp-sonarlint
@@ -90,7 +95,7 @@ analyzer"
 	      (progn
 		(when (not (file-exists-p
 			   enabled-member--analyzer-path))
-		 (when (yes-or-no-p "Unable to find an enable language analyzer. Download and install the analyzer?")
+		 (when (yes-or-no-p "Unable to find an enable language analyzer. Download and install the analyzer? ")
 		   (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))
 		))
 	    (concat "file://"  (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path"))) " "))
@@ -111,7 +116,7 @@ analyzer"
 (lsp-register-client
  (make-lsp-client
   :new-connection (lsp-tcp-server-command 'lsp-sonarlint-server-start-fun)
-  :major-modes '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode css-mode ruby-mode)
+  :major-modes lsp-sonarlint-modes-enabled
   :priority -1
   :multi-root t
   :add-on? t
