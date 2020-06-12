@@ -46,97 +46,97 @@
    (file-name-directory load-file-name)
    "server/sonarlint-server.jar")
   ;; "/home/fermin/Programming/sonarlint-lsp/sonarlint-server.jar"
- "Sonarlint language server location."
+ "Lsp-sonarlint language server location."
  :group 'lsp-sonarlint
  :type 'file)
 
 (defcustom lsp-sonarlint-telemetry-enabled nil
-  "Sonarlint telemetry option."
+  "Lsp-sonarlint telemetry option."
   :group 'lsp-sonarlint
   :type 'boolean)
 
 (defcustom lsp-sonarlint-test-file-pattern "{**/test/**,**/*test*,**/*Test*}"
-  "Sonarlint test language pattern."
+  "Lsp-sonarlint test language pattern."
   :group 'lsp-sonarlint
   :type 'string)
 
 (defcustom lsp-sonarlint-server-download-url
   "https://search.maven.org/remotecontent?filepath=org/sonarsource/sonarlint/core/sonarlint-language-server/4.6.0.2652/sonarlint-language-server-4.6.0.2652.jar"
-  "Sonarlint jar lsp server URL."
+  "Lsp-sonarlint jar lsp server URL."
   :group 'lsp-sonarlint
   :type 'string)
 
 
 (defgroup lsp-sonarlint-php nil
-  "Sonarlint  analyzer group"
+  "lsp-sonarlint  analyzer group"
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-php-files-extension '("php")
-  "Sonarlint php file extensions."
+  "Lsp-sonarlint php file extensions."
   :group 'lsp-sonarlint-php
   :type 'list)
 
 (defcustom lsp-sonarlint-php-analyzer-path
   "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarphp.jar"
-  "Sonarlint php analyzer location."
+  "Lsp-sonarlint php analyzer location."
   :group 'lsp-sonarlint-php
   :type 'file)
 
 
 
 (defgroup lsp-sonarlint-html nil
-  "Sonarlint html analyzer group"
+  "Lsp-sonarlint html analyzer group"
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-html-files-extension '("html")
-  "Sonarlint html file extensions."
+  "Lsp-sonarlint html file extensions."
   :group 'lsp-sonarlint-html
   :type 'list)
 
 (defcustom lsp-sonarlint-html-analyzer-path
   "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarhtml.jar"
-  "Sonarlint html analyzer location."
+  "Lsp-sonarlint html analyzer location."
   :group 'lsp-sonarlint-html
   :type 'file)
 
 
 
 (defgroup lsp-sonarlint-python nil
-  "Sonarlint python analyzer group"
+  "lsp-sonarlint python analyzer group"
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-python-files-extension '("py")
-  "Sonarlint python file extensions."
+  "Lsp-sonarlint python file extensions."
   :group 'lsp-sonarlint-html
   :type 'list)
 
 (defcustom lsp-sonarlint-python-analyzer-path
   "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarpython.jar"
-  "Sonarlint python analyzer location."
+  "Lsp-sonarlint python analyzer location."
   :group 'lsp-sonarlint-html
   :type 'file)
 
 
 
 (defgroup lsp-sonarlint-javascript nil
-  "Sonarlint python analyzer group"
+  "lsp-sonarlint python analyzer group"
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-javascript-files-extension '("js")
-  "Sonarlint python file extensions."
+  "Lsp-sonarlint python file extensions."
   :group 'lsp-sonarlint-javascript
   :type 'list)
 
 (defcustom lsp-sonarlint-javascript-analyzer-path
   "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarjs.jar"
-  "Sonarlint python analyzer location."
+  "Lsp-sonarlint python analyzer location."
   :group 'lsp-sonarlint-javascript
   :type 'file)
 
 
 
 (defun lsp-sonarlint-server-start-fun (port)
-  "Define serenata start function, it requires a PORT."
+  "Lsp-sonarlint start function, it need PORT as parameter."
   `("java" "-jar" ,(eval  lsp-sonarlint-server-path )  ,(number-to-string port)
     ,(concat "file://" lsp-sonarlint-html-analyzer-path " ")
     ,(concat "file://" lsp-sonarlint-php-analyzer-path " ")
