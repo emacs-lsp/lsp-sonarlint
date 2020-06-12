@@ -38,7 +38,7 @@
 (defgroup lsp-sonarlint nil
   "Sonarlint lsp server group"
   :group 'lsp-mode
-  :link '(url-link "")
+  :link '(url-link "https://gitlab.com/sasanidas/lsp-sonarlint")
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-sonarlint-server-path
