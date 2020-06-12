@@ -150,17 +150,17 @@
 
 
 (defgroup lsp-sonarlint-css nil
-  "lsp-sonarlint java analyzer group"
+  "lsp-sonarlint css analyzer group"
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-css-enabled t
-  "Lps-sonarlint java analyzer option."
+  "Lps-sonarlint css analyzer option."
   :group 'lsp-sonarlint-css
   :type 'boolean)
 
 (defcustom lsp-sonarlint-css-analyzer-path
   "/mnt/Documentos/Descargas/sonar-css.jar"
-  "Lsp-sonarlint java analyzer location."
+  "Lsp-sonarlint css analyzer location."
   :group 'lsp-sonarlint-css
   :type 'file)
 
@@ -183,7 +183,7 @@
 	 (concat "file://" lsp-sonarlint-javascript-analyzer-path " "))
 
     ,(when lsp-sonarlint-java-enabled
-       (concat "file://" lsp-sonarlint-java-analyzer-path ))
+       (concat "file://" lsp-sonarlint-java-analyzer-path " " ))
 
     ,(when lsp-sonarlint-css-enabled
        (concat "file://" lsp-sonarlint-css-analyzer-path )))))
@@ -196,7 +196,7 @@
 (lsp-register-client
  (make-lsp-client
   :new-connection (lsp-tcp-server-command 'lsp-sonarlint-server-start-fun)
-  :major-modes '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode)
+  :major-modes '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode css-mode)
   :priority -1
   :multi-root t
   :add-on? t
