@@ -110,9 +110,9 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-python-analyzer-path
-  "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarpython.jar"
+  "/mnt/Documentos/Descargas/sonar-python.jar"
   "Lsp-sonarlint python analyzer location."
-  :group 'lsp-sonarlint-html
+  :group 'lsp-sonarlint-python
   :type 'file)
 
 
