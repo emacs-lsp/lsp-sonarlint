@@ -34,6 +34,7 @@
 
 (require 'lsp-mode)
 (require 'dash)
+(require 'cus-edit)
 
 (defgroup lsp-sonarlint nil
   "Sonarlint lsp server group"
@@ -87,8 +88,8 @@ analyzer"
 			   enabled-member--analyzer-path))
 		 (when (yes-or-no-p "Unable to find an enable language analyzer. Download and install the analyzer?")
 		   (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))
-
-	       (concat "file://"  enabled-member--analyzer-path" "))))
+		))
+	    (concat "file://"  (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path"))) " "))
 	  lsp-sonarlint--enabled-plugins)))
 
 
