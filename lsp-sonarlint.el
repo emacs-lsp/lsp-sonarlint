@@ -41,16 +41,10 @@
   :link '(url-link "https://gitlab.com/sasanidas/lsp-sonarlint")
   :package-version '(lsp-mode . "6.4"))
 
-;; (defcustom lsp-sonarlint-server-path
-;;   (concat
-;;    (file-name-directory load-file-name)
-;;    "server/sonarlint-language-server.jar")
-;;  "Lsp-sonarlint language server location."
-;;  :group 'lsp-sonarlint
-;;  :type 'file)
-
 (defcustom lsp-sonarlint-server-path
-   "/home/fermin/Programming/lsp-sonarlint/server/sonarlint-language-server.jar"
+  (concat
+   (file-name-directory load-file-name)
+   "server/sonarlint-language-server.jar")
  "Lsp-sonarlint language server location."
  :group 'lsp-sonarlint
  :type 'file)
