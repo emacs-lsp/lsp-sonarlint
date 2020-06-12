@@ -45,7 +45,6 @@
   (concat
    (file-name-directory load-file-name)
    "server/sonarlint-server.jar")
-  ;; "/home/fermin/Programming/sonarlint-lsp/sonarlint-server.jar"
  "Lsp-sonarlint language server location."
  :group 'lsp-sonarlint
  :type 'file)
@@ -68,10 +67,11 @@
 
 
 (defgroup lsp-sonarlint-php nil
-  "lsp-sonarlint  analyzer group"
+  "Lsp-sonarlint php analyzer group"
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-php-enabled t
+  "Lps-sonarlint php analyzer option."
   :group 'lsp-sonarlint-php
   :type 'boolean)
 
@@ -88,6 +88,7 @@
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-html-enabled t
+  "Lps-sonarlint html analyzer option."
   :group 'lsp-sonarlint-html
   :type 'boolean)
 
@@ -104,6 +105,7 @@
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-python-enabled nil
+  "Lps-sonarlint python analyzer option."
   :group 'lsp-sonarlint-python
   :type 'boolean)
 
@@ -114,12 +116,12 @@
   :type 'file)
 
 
-
 (defgroup lsp-sonarlint-javascript nil
   "lsp-sonarlint javascript analyzer group"
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-javascript-enabled nil
+  "Lps-sonarlint javascript analyzer option."
   :group 'lsp-sonarlint-javascript
   :type 'boolean)
 
@@ -135,6 +137,7 @@
   :group 'lsp-sonarlint)
 
 (defcustom lsp-sonarlint-java-enabled nil
+  "Lps-sonarlint java analyzer option."
   :group 'lsp-sonarlint-java
   :type 'boolean)
 
