@@ -42,9 +42,11 @@
   :type 'string)
 
 (defcustom lsp-sonarlint-ruby-analyzer-path
-  "/mnt/Documentos/Descargas/sonar-ruby.jar"
-  "Lsp-sonarlint ruby analyzer location."
-  :group 'lsp-sonarlint-java
+(concat
+   (file-name-directory load-file-name)
+   "sonar-ruby.jar")
+"Lsp-sonarlint ruby analyzer location."
+  :group 'lsp-sonarlint-ruby
   :type 'file)
 
 (defvar lsp-sonarlint-ruby-doc-url "https://www.sonarsource.com/ruby/"
