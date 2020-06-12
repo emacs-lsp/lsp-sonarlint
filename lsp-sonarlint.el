@@ -152,20 +152,25 @@
 (defun lsp-sonarlint-server-start-fun (port)
   "Lsp-sonarlint start function, it need PORT as parameter."
   `("java" "-jar" ,(eval  lsp-sonarlint-server-path )  ,(number-to-string port)
-    ,(when lsp-sonarlint-php-enabled
-       (concat "file://" lsp-sonarlint-php-analyzer-path " "))
+    ,(if lsp-sonarlint-php-enabled
+	 (concat "file://" lsp-sonarlint-php-analyzer-path " ")
+       " ")
 
-    ,(when lsp-sonarlint-html-enabled
-       (concat "file://" lsp-sonarlint-html-analyzer-path " "))
+    ,(if lsp-sonarlint-html-enabled
+	 (concat "file://" lsp-sonarlint-html-analyzer-path " ")
+       " ")
 
-    ,(when lsp-sonarlint-python-enabled
-       (concat "file://" lsp-sonarlint-python-analyzer-path " "))
+    ,(if lsp-sonarlint-python-enabled
+	 (concat "file://" lsp-sonarlint-python-analyzer-path " ")
+       " ")
 
-    ,(when lsp-sonarlint-javascript-enabled
-       (concat "file://" lsp-sonarlint-javascript-analyzer-path " "))
+    ,(if lsp-sonarlint-javascript-enabled
+	 (concat "file://" lsp-sonarlint-javascript-analyzer-path " ")
+       " ")
 
-    ,(when lsp-sonarlint-java-enabled
-       (concat "file://" lsp-sonarlint-java-analyzer-path ))))
+    ,(if lsp-sonarlint-java-enabled
+	 (concat "file://" lsp-sonarlint-java-analyzer-path )
+       " ")))
 
 
 (lsp-register-custom-settings
