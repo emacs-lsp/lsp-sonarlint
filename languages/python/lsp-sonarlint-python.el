@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-python nil
   "lsp-sonarlint python analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-python . "3.5.0"))
+  :version '(lsp-sonarlint-python . "2.9.0"))
 
 (defcustom lsp-sonarlint-python-enabled t
   "Enable lsp-sonarlint-python plugin."
