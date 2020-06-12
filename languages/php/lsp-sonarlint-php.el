@@ -32,21 +32,21 @@
 
 (defcustom lsp-sonarlint-php-enabled t
   "Enable lsp-sonarlint-php plugin."
-  :group 'lsp-sonarlint-ruby
+  :group 'lsp-sonarlint-php
   :type 'boolean)
 
 (defcustom lsp-sonarlint-php-download-url
   "https://binaries.sonarsource.com/Distribution/sonar-php-plugin/sonar-php-plugin-3.5.0.5655.jar"
   "Php plugin download URL."
-  :group 'lsp-sonarlint-ruby
+  :group 'lsp-sonarlint-php
   :type 'string)
 
 (defcustom lsp-sonarlint-php-analyzer-path
 (concat
    (file-name-directory load-file-name)
-   "languages/php/sonar-php.jar")
+   "sonar-php.jar")
   "Lsp-sonarlint php analyzer location."
-  :group 'lsp-sonarlint-java
+  :group 'lsp-sonarlint-php
   :type 'file)
 
 (defvar lsp-sonarlint-php-doc-url "https://www.sonarsource.com/php/"
