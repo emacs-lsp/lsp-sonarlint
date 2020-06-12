@@ -66,7 +66,11 @@
   :group 'lsp-sonarlint
   :type 'string)
 
-;;TODO This can be separated in 2 functions
+(let ((default-directory (concat
+			  (file-name-directory load-file-name)
+			  "languages")))
+  (normal-top-level-add-subdirs-to-load-path))
+
 (defun lsp-sonarlint--plugin-list ()
   "Check for the enabled extensions and return a path list.
 If the analyzer path is not a file, it ask for download the
