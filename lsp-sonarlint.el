@@ -120,13 +120,13 @@
   "lsp-sonarlint javascript analyzer group"
   :group 'lsp-sonarlint)
 
-(defcustom lsp-sonarlint-javascript-enabled nil
+(defcustom lsp-sonarlint-javascript-enabled t
   "Lps-sonarlint javascript analyzer option."
   :group 'lsp-sonarlint-javascript
   :type 'boolean)
 
 (defcustom lsp-sonarlint-javascript-analyzer-path
-  "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarjs.jar"
+  "/mnt/Documentos/Descargas/sonar-javascript.jar"
   "Lsp-sonarlint javascript analyzer location."
   :group 'lsp-sonarlint-javascript
   :type 'file)
