@@ -71,10 +71,9 @@
   "lsp-sonarlint  analyzer group"
   :group 'lsp-sonarlint)
 
-(defcustom lsp-sonarlint-php-files-extension '("php")
-  "Lsp-sonarlint php file extensions."
+(defcustom lsp-sonarlint-php-enabled t
   :group 'lsp-sonarlint-php
-  :type 'list)
+  :type 'boolean)
 
 (defcustom lsp-sonarlint-php-analyzer-path
   "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarphp.jar"
@@ -88,10 +87,9 @@
   "Lsp-sonarlint html analyzer group"
   :group 'lsp-sonarlint)
 
-(defcustom lsp-sonarlint-html-files-extension '("html")
-  "Lsp-sonarlint html file extensions."
+(defcustom lsp-sonarlint-html-enabled t
   :group 'lsp-sonarlint-html
-  :type 'list)
+  :type 'boolean)
 
 (defcustom lsp-sonarlint-html-analyzer-path
   "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarhtml.jar"
@@ -105,10 +103,9 @@
   "lsp-sonarlint python analyzer group"
   :group 'lsp-sonarlint)
 
-(defcustom lsp-sonarlint-python-files-extension '("py")
-  "Lsp-sonarlint python file extensions."
-  :group 'lsp-sonarlint-html
-  :type 'list)
+(defcustom lsp-sonarlint-python-enabled nil
+  :group 'lsp-sonarlint-python
+  :type 'boolean)
 
 (defcustom lsp-sonarlint-python-analyzer-path
   "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarpython.jar"
@@ -119,18 +116,32 @@
 
 
 (defgroup lsp-sonarlint-javascript nil
-  "lsp-sonarlint python analyzer group"
+  "lsp-sonarlint javascript analyzer group"
   :group 'lsp-sonarlint)
 
-(defcustom lsp-sonarlint-javascript-files-extension '("js")
-  "Lsp-sonarlint python file extensions."
+(defcustom lsp-sonarlint-javascript-enabled nil
   :group 'lsp-sonarlint-javascript
-  :type 'list)
+  :type 'boolean)
 
 (defcustom lsp-sonarlint-javascript-analyzer-path
   "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarjs.jar"
-  "Lsp-sonarlint python analyzer location."
+  "Lsp-sonarlint javascript analyzer location."
   :group 'lsp-sonarlint-javascript
+  :type 'file)
+
+
+(defgroup lsp-sonarlint-java nil
+  "lsp-sonarlint java analyzer group"
+  :group 'lsp-sonarlint)
+
+(defcustom lsp-sonarlint-java-enabled nil
+  :group 'lsp-sonarlint-java
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-java-analyzer-path
+  "/home/fermin/Programming/sonarlint-lsp/extension/analyzers/sonarjava.jar"
+  "Lsp-sonarlint java analyzer location."
+  :group 'lsp-sonarlint-java
   :type 'file)
 
 
@@ -138,10 +149,20 @@
 (defun lsp-sonarlint-server-start-fun (port)
   "Lsp-sonarlint start function, it need PORT as parameter."
   `("java" "-jar" ,(eval  lsp-sonarlint-server-path )  ,(number-to-string port)
-    ,(concat "file://" lsp-sonarlint-html-analyzer-path " ")
-    ,(concat "file://" lsp-sonarlint-php-analyzer-path " ")
-    ,(concat "file://" lsp-sonarlint-python-analyzer-path " ")
-    ,(concat "file://" lsp-sonarlint-javascript-analyzer-path)))
+    ,(when lsp-sonarlint-php-enabled
+       (concat "file://" lsp-sonarlint-php-analyzer-path " "))
+
+    ,(when lsp-sonarlint-html-enabled
+       (concat "file://" lsp-sonarlint-html-analyzer-path " "))
+
+    ,(when lsp-sonarlint-python-enabled
+       (concat "file://" lsp-sonarlint-python-analyzer-path " "))
+
+    ,(when lsp-sonarlint-javascript-enabled
+       (concat "file://" lsp-sonarlint-javascript-analyzer-path " "))
+
+    ,(when lsp-sonarlint-java-enabled
+       (concat "file://" lsp-sonarlint-java-analyzer-path ))))
 
 
 (lsp-register-custom-settings
