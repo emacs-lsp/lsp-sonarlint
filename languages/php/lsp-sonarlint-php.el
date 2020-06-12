@@ -42,7 +42,9 @@
   :type 'string)
 
 (defcustom lsp-sonarlint-php-analyzer-path
-  "/mnt/Documentos/Descargas/sonar-php.jar"
+(concat
+   (file-name-directory load-file-name)
+   "languages/php/sonar-php.jar")
   "Lsp-sonarlint php analyzer location."
   :group 'lsp-sonarlint-java
   :type 'file)
