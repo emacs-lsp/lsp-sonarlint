@@ -50,7 +50,7 @@
  :group 'lsp-sonarlint
  :type 'file)
 
-(defcustom lsp-sonarlint-telemetry-enabled nil
+(defcustom lsp-sonarlint-disable-telemetry t
   "Lsp-sonarlint telemetry option."
   :group 'lsp-sonarlint
   :type 'boolean)
@@ -145,7 +145,7 @@
 
 
 (lsp-register-custom-settings
- '(("sonarlint.disableTelemetry" t)
+ '(("sonarlint.disableTelemetry" lsp-sonarlint-disable-telemetry)
    ("sonarlint.testFilePattern" lsp-sonarlint-test-file-pattern)))
 
 (lsp-register-client
