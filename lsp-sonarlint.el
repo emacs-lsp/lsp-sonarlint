@@ -104,7 +104,7 @@
   "lsp-sonarlint python analyzer group"
   :group 'lsp-sonarlint)
 
-(defcustom lsp-sonarlint-python-enabled nil
+(defcustom lsp-sonarlint-python-enabled t
   "Lps-sonarlint python analyzer option."
   :group 'lsp-sonarlint-python
   :type 'boolean)
