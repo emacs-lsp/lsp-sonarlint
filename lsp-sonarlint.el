@@ -95,7 +95,7 @@ analyzer"
 	      (progn
 		(when (not (file-exists-p
 			   enabled-member--analyzer-path))
-		 (when (yes-or-no-p "Unable to find an enable language analyzer. Download and install the analyzer? ")
+		 (when (yes-or-no-p "lsp-sonarlint language plugin not found, do you want to download it? ")
 		   (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))
 		))
 	    (concat "file://"  (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path"))) " "))
