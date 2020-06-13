@@ -50,7 +50,7 @@
  :group 'lsp-sonarlint
  :type 'file)
 
-(defcustom lsp-sonarlint-modes-enabled '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode css-mode ruby-mode)
+(defcustom lsp-sonarlint-modes-enabled '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode css-mode ruby-mode scala-mode)
   "Lsp-sonarlint activation modes."
   :group 'lsp-sonarlint
   :type 'file)
