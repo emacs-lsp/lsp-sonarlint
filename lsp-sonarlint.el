@@ -47,9 +47,9 @@
   (concat
    (file-name-directory load-file-name)
    "server/sonarlint-language-server.jar")
- "Lsp-sonarlint language server location."
- :group 'lsp-sonarlint
- :type 'file)
+  "Lsp-sonarlint language server location."
+  :group 'lsp-sonarlint
+  :type 'file)
 
 (defcustom lsp-sonarlint-modes-enabled '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode css-mode ruby-mode scala-mode xml-mode nxml-mode)
   "Lsp-sonarlint activation modes."
@@ -95,12 +95,27 @@ analyzer"
 		    (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path")))))
 	      (progn
 		(when (not (file-exists-p
-			   enabled-member--analyzer-path))
-		 (when (yes-or-no-p "lsp-sonarlint language plugin not found, do you want to download it? ")
-		   (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))
+			    enabled-member--analyzer-path))
+		  (when (yes-or-no-p "lsp-sonarlint language plugin not found, do you want to download it? ")
+		    (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))
 		))
 	    (concat "file://"  (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path"))) " "))
 	  lsp-sonarlint--enabled-plugins)))
+
+(defun lsp-sonarlint--code-action-open-rule (rule)
+  "Create an HTML rendered buffer with the RULE text in it."
+  (with-temp-buffer
+    (let* ((rule-title (format "%s" (aref (ht-get rule "arguments") 1)))
+	   (rule-formated-title (replace-regexp-in-string ">" " "
+							  (replace-regexp-in-string "<"  " "  rule-title)))
+	   (rule-body (aref  (ht-get rule "arguments" ) 2)))
+      (progn
+	(insert rule-formated-title)
+	(insert "\n")
+	(insert rule-body)
+	))
+    (shr-render-buffer (current-buffer)))
+  )
 
 
 (defun lsp-sonarlint-server-start-fun (port)
@@ -108,6 +123,11 @@ analyzer"
   (-concat
    `("java" "-jar" ,(eval  lsp-sonarlint-server-path )  ,(number-to-string port))
    (lsp-sonarlint--plugin-list)))
+
+
+(defconst lsp-sonarlint--action-handlers
+  '(("SonarLint.OpenRuleDesc" .
+     (lambda (rule) (lsp-sonarlint--code-action-open-rule rule)))))
 
 
 (lsp-register-custom-settings
@@ -122,10 +142,11 @@ analyzer"
   :multi-root t
   :add-on? t
   :server-id 'sonarlint
+  :action-handlers (ht<-alist lsp-sonarlint--action-handlers)
   :initialization-options (lambda ()
 			    (list
-			      :productKey "emacs"
-			      :productName "Emacs"))
+			     :productKey "emacs"
+			     :productName "Emacs"))
   :initialized-fn (lambda (workspace)
                     (with-lsp-workspace workspace
                       (lsp--set-configuration
