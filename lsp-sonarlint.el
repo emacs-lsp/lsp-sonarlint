@@ -7,7 +7,7 @@
 ;; Version: 0.0.1
 ;; Keywords: languages
 ;; URL: https://gitlab.com/sasanidas/lsp-sonarlint
-;; Package-Requires: ((emacs "25") (dash "2.12.0") (lsp-mode "6.3"))
+;; Package-Requires: ((emacs "25") (dash "2.12.0") (lsp-mode "6.3") (ht "2.3"))
 ;; License: GPL-3.0-or-later
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -35,6 +35,7 @@
 (require 'lsp-mode)
 (require 'dash)
 (require 'cus-edit)
+(require 'ht)
 
 (defgroup lsp-sonarlint nil
   "Sonarlint lsp server group"
