@@ -66,6 +66,11 @@
   :group 'lsp-sonarlint
   :type 'string)
 
+(defcustom lsp-sonarlint-show-analyzer-logs nil
+  "Lsp-sonarlint, option to show analyzer logs."
+  :group 'lsp-sonarlint
+  :type 'string)
+
 (defcustom lsp-sonarlint-server-download-url
   "https://search.maven.org/remotecontent?filepath=org/sonarsource/sonarlint/core/sonarlint-language-server/4.6.0.2652/sonarlint-language-server-4.6.0.2652.jar"
   "Lsp-sonarlint jar lsp server URL."
@@ -114,8 +119,7 @@ analyzer"
 	(insert "\n")
 	(insert rule-body)
 	))
-    (shr-render-buffer (current-buffer)))
-  )
+    (shr-render-buffer (current-buffer))))
 
 
 (defun lsp-sonarlint-server-start-fun (port)
@@ -132,7 +136,8 @@ analyzer"
 
 (lsp-register-custom-settings
  '(("sonarlint.disableTelemetry" lsp-sonarlint-disable-telemetry)
-   ("sonarlint.testFilePattern" lsp-sonarlint-test-file-pattern)))
+   ("sonarlint.testFilePattern" lsp-sonarlint-test-file-pattern)
+   ("sonarlint.output.showAnalyzerLogs" lsp-sonarlint-show-analyzer-logs)))
 
 (lsp-register-client
  (make-lsp-client
