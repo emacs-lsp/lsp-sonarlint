@@ -93,7 +93,9 @@ To analyze JavaScript and TypeScript, SonarLint will also need Node.js.
 
 ## Data and telemetry
 
-This extension collects anonymous usage data and sends it to SonarSource. Collection of telemetry is controlled via the setting: `lsp-sonarlint-disable-telemetry`. Click [here](https://github.com/SonarSource/sonarlint-vscode/blob/master/telemetry-sample.md) to see a sample of the data that are collected.
+This extension collects anonymous usage data and sends it to SonarSource. 
+
+Collection of telemetry is controlled via the setting: `lsp-sonarlint-disable-telemetry`. Click [here](https://github.com/SonarSource/sonarlint-vscode/blob/master/telemetry-sample.md) to see a sample of the data that are collected.
 
 ## License
 lsp-sonarlint Copyright © 2020 by Fermin Munoz <fmfs@posteo.net>
