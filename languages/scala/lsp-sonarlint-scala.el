@@ -30,7 +30,7 @@
   :group 'lsp-sonarlint
   :version '(lsp-sonarlint-scala . "1.7.0"))
 
-(defcustom lsp-sonarlint-scala-enabled t
+(defcustom lsp-sonarlint-scala-enabled nil
   "Enable lsp-sonarlint-scala plugin."
   :group 'lsp-sonarlint-scala
   :type 'boolean)

@@ -30,7 +30,7 @@
   :group 'lsp-sonarlint
   :version '(lsp-sonarlint-python . "2.9.0"))
 
-(defcustom lsp-sonarlint-python-enabled t
+(defcustom lsp-sonarlint-python-enabled nil
   "Enable lsp-sonarlint-python plugin."
   :group 'lsp-sonarlint-python
   :type 'boolean)

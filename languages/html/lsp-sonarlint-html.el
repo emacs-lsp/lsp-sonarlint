@@ -30,7 +30,7 @@
   :group 'lsp-sonarlint
   :version '(lsp-sonarlint-html . "3.2.0"))
 
-(defcustom lsp-sonarlint-html-enabled t
+(defcustom lsp-sonarlint-html-enabled nil
   "Enable lsp-sonarlint-html plugin."
   :group 'lsp-sonarlint-html
   :type 'boolean)

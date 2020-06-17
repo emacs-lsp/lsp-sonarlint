@@ -30,7 +30,7 @@
   :group 'lsp-sonarlint
   :version '(lsp-sonarlint-php . "3.5.0"))
 
-(defcustom lsp-sonarlint-php-enabled t
+(defcustom lsp-sonarlint-php-enabled nil
   "Enable lsp-sonarlint-php plugin."
   :group 'lsp-sonarlint-php
   :type 'boolean)

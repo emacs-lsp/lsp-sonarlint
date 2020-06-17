@@ -30,7 +30,7 @@
   :group 'lsp-sonarlint
   :version '(lsp-sonarlint-xml . "2.0.1"))
 
-(defcustom lsp-sonarlint-xml-enabled t
+(defcustom lsp-sonarlint-xml-enabled nil
   "Enable lsp-sonarlint-xml plugin."
   :group 'lsp-sonarlint-xml
   :type 'boolean)

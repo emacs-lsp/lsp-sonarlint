@@ -30,7 +30,7 @@
   :group 'lsp-sonarlint
   :version '(lsp-sonarlint-ruby . "1.7.0"))
 
-(defcustom lsp-sonarlint-ruby-enabled t
+(defcustom lsp-sonarlint-ruby-enabled nil
   "Enable lsp-sonarlint-ruby plugin."
   :group 'lsp-sonarlint-ruby
   :type 'boolean)
