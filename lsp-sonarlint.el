@@ -83,7 +83,9 @@ e.g https://<myServerUrl>"
 
 (defcustom lsp-sonarlint-vmargs ""
   "Extra JVM arguments used to launch the SonarLint LSP.
-e.g. `-Xmx1024m`.")
+e.g. `-Xmx1024m`."
+  :group 'lsp-sonarlint
+  :type 'string)
 
 (defcustom lsp-sonarlint-server-download-url
   "https://search.maven.org/remotecontent?filepath=org/sonarsource/sonarlint/core/sonarlint-language-server/4.6.0.2652/sonarlint-language-server-4.6.0.2652.jar"
@@ -116,8 +118,7 @@ analyzer"
 		(when (not (file-exists-p
 			    enabled-member--analyzer-path))
 		  (when (yes-or-no-p "lsp-sonarlint language plugin not found, do you want to download it? ")
-		    (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))
-		))
+		    (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))))
 	    (concat "file://"  (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path"))) " "))
 	  lsp-sonarlint--enabled-plugins)))
 
@@ -131,8 +132,7 @@ analyzer"
       (progn
 	(insert rule-formated-title)
 	(insert "\n")
-	(insert rule-body)
-	))
+	(insert rule-body)))
     (shr-render-buffer (current-buffer))))
 
 
