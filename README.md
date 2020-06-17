@@ -89,8 +89,6 @@ Out of the box, SonarLint automatically checks your code against the following r
 
 The SonarLint language server needs a Java Runtime (JRE) 8 or 11. If one is already installed on your computer, SonarLint should automatically find and use it.
 
-If a suitable JRE cannot be found at the usual places, SonarLint will ask for your permission to download and manage its own version.
-
 To analyze JavaScript and TypeScript, SonarLint will also need Node.js.
 
 ## Data and telemetry
