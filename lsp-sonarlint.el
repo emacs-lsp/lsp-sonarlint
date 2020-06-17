@@ -36,6 +36,7 @@
 (require 'dash)
 (require 'cus-edit)
 (require 'ht)
+(require 'shr)
 
 (defgroup lsp-sonarlint nil
   "Sonarlint lsp server group"
