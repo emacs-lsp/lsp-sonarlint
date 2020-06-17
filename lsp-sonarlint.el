@@ -47,33 +47,47 @@
   (concat
    (file-name-directory load-file-name)
    "server/sonarlint-language-server.jar")
-  "Lsp-sonarlint language server location."
+  "Sonarlint Language Server jar file location."
   :group 'lsp-sonarlint
   :type 'file)
 
 (defcustom lsp-sonarlint-modes-enabled '(php-mode html-mode web-mode js-mode js2-mode python-mode java-mode css-mode ruby-mode scala-mode xml-mode nxml-mode)
-  "Lsp-sonarlint activation modes."
+  "List of enabled major modes."
   :group 'lsp-sonarlint
   :type 'file)
 
 (defcustom lsp-sonarlint-disable-telemetry t
-  "Lsp-sonarlint telemetry option."
+  "Disable sending anonymous usage statistics to SonarSource.
+To see a sample of the data that are collected
+https://github.com/SonarSource/sonarlint-vscode/blob/master/telemetry-sample.md."
   :group 'lsp-sonarlint
   :type 'boolean)
 
 (defcustom lsp-sonarlint-test-file-pattern "{**/test/**,**/*test*,**/*Test*}"
-  "Lsp-sonarlint test language pattern."
+  "Files whose name match java global are considered as test files by analyzers.
+Most rules are not evaluated on test files.
+Example: `{**/test/**,**/*test*,**/*Test*}`"
+  :group 'lsp-sonarlint
+  :type 'string)
+
+(defcustom lsp-sonarlint-sonarqube-server-url ""
+  "URL of the server.
+e.g https://<myServerUrl>"
   :group 'lsp-sonarlint
   :type 'string)
 
 (defcustom lsp-sonarlint-show-analyzer-logs nil
-  "Lsp-sonarlint, option to show analyzer logs."
+  "Show analyzer's logs in the SonarLint output."
   :group 'lsp-sonarlint
-  :type 'string)
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-vmargs ""
+  "Extra JVM arguments used to launch the SonarLint LSP.
+e.g. `-Xmx1024m`.")
 
 (defcustom lsp-sonarlint-server-download-url
   "https://search.maven.org/remotecontent?filepath=org/sonarsource/sonarlint/core/sonarlint-language-server/4.6.0.2652/sonarlint-language-server-4.6.0.2652.jar"
-  "Lsp-sonarlint jar lsp server URL."
+  "Sonarlint Language Server jar file download URL."
   :group 'lsp-sonarlint
   :type 'string)
 
@@ -137,7 +151,8 @@ analyzer"
 (lsp-register-custom-settings
  '(("sonarlint.disableTelemetry" lsp-sonarlint-disable-telemetry)
    ("sonarlint.testFilePattern" lsp-sonarlint-test-file-pattern)
-   ("sonarlint.output.showAnalyzerLogs" lsp-sonarlint-show-analyzer-logs)))
+   ("sonarlint.output.showAnalyzerLogs" lsp-sonarlint-show-analyzer-logs)
+   ("sonarlint.ls.vmargs" lsp-sonarlint-vmargs)))
 
 (lsp-register-client
  (make-lsp-client
