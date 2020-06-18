@@ -1,5 +1,6 @@
 # SonarLint for Emacs
 ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)
+<a href="https://www.sonarlint.org/"> <img align="right" width="120" src="./images/SonarLint_icon.svg"></a>
 
 
 SonarLint is a free IDE extension that lets you fix coding issues before they exist! Like a spell checker, SonarLint highlights Bugs and Security Vulnerabilities as you write code, with clear remediation guidance so you can fix them before the code is even committed. 
