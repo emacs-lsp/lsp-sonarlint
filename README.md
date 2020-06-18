@@ -9,6 +9,8 @@ Like a spell checker, SonarLint highlights Bugs and Security Vulnerabilities as 
 
 SonarLint in Emacs supports analysis of JavaScript, TypeScript, Python, Java, HTML , PHP, Ruby, Scala and XML out of the box!
 
+:warning: This is not an official [SonarSource](https://www.sonarsource.com/) extension
+
 ![Flycheck gif](https://gitlab.com/sasanidas/lsp-sonarlint/-/raw/master/examples/sonarlint-example.gif "Flycheck gif")
 ## Requirements
 
