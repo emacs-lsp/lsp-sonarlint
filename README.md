@@ -1,4 +1,6 @@
 # SonarLint for Emacs
+![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)
+
 
 SonarLint is a free IDE extension that lets you fix coding issues before they exist! Like a spell checker, SonarLint highlights Bugs and Security Vulnerabilities as you write code, with clear remediation guidance so you can fix them before the code is even committed. 
 SonarLint in Emacs supports analysis of JavaScript, TypeScript, Python, Java, HTML , PHP, Ruby, Scala and XML out of the box!
@@ -11,6 +13,10 @@ SonarLint in Emacs supports analysis of JavaScript, TypeScript, Python, Java, HT
 - [curl](https://curl.haxx.se/)
 - [ht](https://github.com/Wilfred/ht.el)
 - [dash](https://github.com/magnars/dash.el)
+
+The SonarLint language server needs a Java Runtime (JRE) 8 or 11. If one is already installed on your computer, SonarLint should automatically find and use it.
+
+To analyze JavaScript and TypeScript, SonarLint will also need Node.js.
 
 
 ## Installation
@@ -67,10 +73,6 @@ The extension will check every plugin path and ask if it is not find to download
 the default path is defined in **lsp-sonarlint-LANGUAGENAME-analyzer-path**.
 
 
-
-
- 
-
 ## Static Analysis Rules
 
 Out of the box, SonarLint automatically checks your code against the following rules:
@@ -85,30 +87,42 @@ Out of the box, SonarLint automatically checks your code against the following r
 - [Ruby rules](https://rules.sonarsource.com/ruby)
 - [XML rules](https://rules.sonarsource.com/xml)
 
-## Requirements
+## Supported settings
 
-The SonarLint language server needs a Java Runtime (JRE) 8 or 11. If one is already installed on your computer, SonarLint should automatically find and use it.
+* `lsp-sonarlint-server-path` - Path of the sonarlint jar executable file.
+* `lsp-sonarlint-modes-enabled` - List of major modes where the lsp server will activate.
+* `lsp-sonarlint-disable-telemetry` - Disable telemetry option (disabled by default).
+* `lsp-sonarlint-test-file-pattern` - Regex to find test file, most rules are not evaluated on test files.
+* `lsp-sonarlint-show-analyzer-logs` - Show analyzer logs.
+* `lsp-sonarlint-server-download-url` - Sonarlint server download URL.
 
-To analyze JavaScript and TypeScript, SonarLint will also need Node.js.
+### Plugins supported settings
+This settigns are common for all the language plugins.
+
+* `lsp-sonarlint-LANGUAGE-enabled` - Enable LANGUAGE lsp-sonarlint plugin (disable by default)
+* `lsp-sonarlint-LANGUAGE-download-url` - URL to download the LANGUAGE sonarlint plugin
+* `lsp-sonarlint-LANGUAGE-analyzer-path` - Location where the plugin/anlyzer is located.
+* `lsp-sonarlint-LANGUAGE-doc-url` - Sonarsource official plugin documentation
+* `lsp-sonarlint-LANGUAGE-repository-url` - Plugin source code
+
+
 
 ## Data and telemetry
 
 This extension collects anonymous usage data and sends it to SonarSource. 
 
-Collection of telemetry is controlled via the setting: `lsp-sonarlint-disable-telemetry`. Click [here](https://github.com/SonarSource/sonarlint-vscode/blob/master/telemetry-sample.md) to see a sample of the data that are collected.
+Collection of telemetry is controlled via the setting: `lsp-sonarlint-disable-telemetry`, it is disable by default.
 
-## License
-lsp-sonarlint Copyright © 2020 by Fermin Munoz <fmfs@posteo.net>
+Click [here](https://github.com/SonarSource/sonarlint-vscode/blob/master/telemetry-sample.md) to see a sample of the data that are collected.
 
-lsp-sonarlint is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+## Additional packages
 
-lsp-sonarlint is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+* [lsp-ui](https://github.com/emacs-lsp/lsp-ui) : Flycheck, documentation and code actions support.
+* [company-lsp](https://github.com/tigersoldier/company-lsp) : LSP company backend.
+* [treemacs](https://github.com/Alexander-Miller/treemacs) : Project viewer.
+* [lsp-treemacs](https://github.com/emacs-lsp/lsp-treemacs) : `lsp-mode` GUI controls implemented using treemacs.
 
-You should have received a copy of the GNU General Public License
-along with lsp-sonarlint.  If not, see <http://www.gnu.org/licenses/>.
+
+## Contributions
+
+Contributions are very much welcome.
