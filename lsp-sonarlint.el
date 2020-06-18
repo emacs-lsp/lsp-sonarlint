@@ -88,7 +88,7 @@ e.g. `-Xmx1024m`."
   :type 'string)
 
 (defcustom lsp-sonarlint-server-download-url
-  "https://search.maven.org/remotecontent?filepath=org/sonarsource/sonarlint/core/sonarlint-language-server/4.6.0.2652/sonarlint-language-server-4.6.0.2652.jar"
+  "https://binaries.sonarsource.com/Distribution/sonarlint-language-server/sonarlint-language-server-4.6.0.2652.jar"
   "Sonarlint Language Server jar file download URL."
   :group 'lsp-sonarlint
   :type 'string)
