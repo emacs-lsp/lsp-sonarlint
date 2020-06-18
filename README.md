@@ -3,7 +3,10 @@
 <a href="https://www.sonarlint.org/"> <img align="right" width="120" src="./images/SonarLint_icon.svg"></a>
 
 
-SonarLint is a free IDE extension that lets you fix coding issues before they exist! Like a spell checker, SonarLint highlights Bugs and Security Vulnerabilities as you write code, with clear remediation guidance so you can fix them before the code is even committed. 
+SonarLint is a free IDE extension that lets you fix coding issues before they exist!
+
+Like a spell checker, SonarLint highlights Bugs and Security Vulnerabilities as you write code, with clear remediation guidance so you can fix them before the code is even committed. 
+
 SonarLint in Emacs supports analysis of JavaScript, TypeScript, Python, Java, HTML , PHP, Ruby, Scala and XML out of the box!
 
 ![Flycheck gif](https://gitlab.com/sasanidas/lsp-sonarlint/-/raw/master/examples/sonarlint-example.gif "Flycheck gif")
