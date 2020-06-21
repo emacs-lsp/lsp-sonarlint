@@ -115,11 +115,10 @@ analyzer"
 		    (eval (intern (concat (format "%s" (car enabled-member) ) "-download-url"))))
 		   (enabled-member--analyzer-path
 		    (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path")))))
-	      (progn
-		(when (not (file-exists-p
-			    enabled-member--analyzer-path))
-		  (when (yes-or-no-p "lsp-sonarlint language plugin not found, do you want to download it? ")
-		    (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))))
+	      ((unless (file-exists-p
+			enabled-member--analyzer-path)
+		 (when (yes-or-no-p "lsp-sonarlint language plugin not found, do you want to download it? ")
+		   (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path))))))
 	    (concat "file://"  (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path"))) " "))
 	  lsp-sonarlint--enabled-plugins)))
 
@@ -130,10 +129,9 @@ analyzer"
 	   (rule-formated-title (replace-regexp-in-string ">" " "
 							  (replace-regexp-in-string "<"  " "  rule-title)))
 	   (rule-body (aref  (ht-get rule "arguments" ) 2)))
-      (progn
-	(insert rule-formated-title)
-	(insert "\n")
-	(insert rule-body)))
+      ((insert rule-formated-title)
+       (insert "\n")
+       (insert rule-body)))
     (shr-render-buffer (current-buffer))))
 
 
