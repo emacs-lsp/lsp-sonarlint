@@ -94,10 +94,7 @@ e.g. `-Xmx1024m`."
   :group 'lsp-sonarlint
   :type 'string)
 
-(let ((default-directory (concat
-			  (file-name-directory load-file-name)
-			  "languages")))
-  (normal-top-level-add-subdirs-to-load-path))
+(add-to-list 'load-path (concat (file-name-directory load-file-name) "languages"))
 
 (defun lsp-sonarlint--plugin-list ()
   "Check for the enabled extensions and return a path list.
