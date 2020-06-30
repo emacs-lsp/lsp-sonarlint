@@ -124,7 +124,7 @@ Click [here](https://github.com/SonarSource/sonarlint-vscode/blob/master/telemet
 ## Additional packages
 
 * [lsp-ui](https://github.com/emacs-lsp/lsp-ui) : Flycheck, documentation and code actions support.
-* [company-lsp](https://github.com/tigersoldier/company-lsp) : LSP company backend.
+* [company-capf](https://github.com/company-mode/company-mode) : Completion backend support.
 * [treemacs](https://github.com/Alexander-Miller/treemacs) : Project viewer.
 * [lsp-treemacs](https://github.com/emacs-lsp/lsp-treemacs) : `lsp-mode` GUI controls implemented using treemacs.
 
