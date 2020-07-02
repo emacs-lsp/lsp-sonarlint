@@ -1,6 +1,8 @@
 # SonarLint for Emacs
 ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)
+[![MELPA](https://melpa.org/packages/lsp-sonarlint-badge.svg)](https://melpa.org/#/lsp-sonarlint)
 <a href="https://www.sonarlint.org/"> <img align="right" width="120" src="./images/SonarLint_icon.svg"></a>
+
 
 
 SonarLint is a free IDE extension that lets you fix coding issues before they exist!
@@ -31,7 +33,12 @@ To analyze JavaScript and TypeScript, SonarLint will also need Node.js.
 Download and include the main file lsp-sonarlint.el and the folders languages and server.
 
 ### Melpa
-WIP
+You can then run the following commands to install lsp-sonarlint:
+
+```
+M-x package-refresh-contents RET      (to refresh your package database)
+M-x package-install RET lsp-sonarlint RET   (to install and compile `lsp-sonarlint` and its dependencies)
+```
 
 ## Usage
 Sonarlint language server relies on java plugins to properly analyze the selected language source code.
