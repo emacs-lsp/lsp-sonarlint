@@ -6,7 +6,7 @@
 ;; Created: 13 Jun 2020
 ;; Version: 0.0.1
 ;; Keywords: languages, tools, php, javascript, xml, ruby, html, scala, java, python
-;; URL: https://gitlab.com/sasanidas/lsp-sonarlint
+;; URL: https://github.com/emacs-lsp/lsp-sonarlint
 ;; Package-Requires: ((emacs "25") (dash "2.12.0") (lsp-mode "6.3") (ht "2.3"))
 ;; License: GPL-3.0-or-later
 
