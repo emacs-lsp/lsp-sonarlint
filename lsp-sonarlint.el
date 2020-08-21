@@ -94,7 +94,10 @@ e.g. `-Xmx1024m`."
   :group 'lsp-sonarlint
   :type 'string)
 
-(add-to-list 'load-path (concat (file-name-directory load-file-name) "languages"))
+(let ((languages-directory-path (concat (file-name-directory load-file-name) "languages")))
+  (if (file-directory-p languages-directory-path)
+      (add-to-list 'load-path languages-directory-path)
+    (error "There were and error with the `load-file-name` function")))
 
 (defun lsp-sonarlint--plugin-list ()
   "Check for the enabled extensions and return a path list.
