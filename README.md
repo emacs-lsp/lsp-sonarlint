@@ -16,7 +16,6 @@ SonarLint in Emacs supports analysis of JavaScript, TypeScript, Python, Java, HT
 
 - emacs >= 25
 - [lsp-mode](https://github.com/emacs-lsp/lsp-mode)
-- [curl](https://curl.haxx.se/)
 - [ht](https://github.com/Wilfred/ht.el)
 - [dash](https://github.com/magnars/dash.el)
 

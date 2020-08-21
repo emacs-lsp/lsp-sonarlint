@@ -116,10 +116,10 @@ analyzer"
 		   (enabled-member--analyzer-path
 		    (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path")))))
 	      (unless (file-exists-p
-			enabled-member--analyzer-path)
-		 (when (yes-or-no-p "lsp-sonarlint language plugin not found, do you want to download it? ")
-		   (shell-command (concat "curl " enabled-member--download-url " --output " enabled-member--analyzer-path)))))
-	    (concat "file://"  (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path"))) " "))
+		       enabled-member--analyzer-path)
+		(when (yes-or-no-p "lsp-sonarlint language plugin not found, do you want to download it? ")
+		  (url-copy-file enabled-member--download-url enabled-member--analyzer-path)))
+	      (concat "file://"  enabled-member--analyzer-path " ")))
 	  lsp-sonarlint--enabled-plugins)))
 
 (defun lsp-sonarlint--code-action-open-rule (rule)
