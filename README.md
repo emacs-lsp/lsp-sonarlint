@@ -1,6 +1,7 @@
 # SonarLint for Emacs
 ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 [![MELPA](https://melpa.org/packages/lsp-sonarlint-badge.svg)](https://melpa.org/#/lsp-sonarlint)
+[![MELPA Stable](https://stable.melpa.org/packages/lsp-sonarlint-badge.svg)](https://stable.melpa.org/#/lsp-sonarlint)
 <a href="https://www.sonarlint.org/"> <img align="right" width="120" src="./images/SonarLint_icon.svg"></a>
 
 
