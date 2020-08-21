@@ -1,13 +1,15 @@
 # SonarLint for Emacs
 ![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)
+[![MELPA](https://melpa.org/packages/lsp-sonarlint-badge.svg)](https://melpa.org/#/lsp-sonarlint)
 <a href="https://www.sonarlint.org/"> <img align="right" width="120" src="./images/SonarLint_icon.svg"></a>
 
 
-SonarLint is a free IDE extension that lets you fix coding issues before they exist!
 
-Like a spell checker, SonarLint highlights Bugs and Security Vulnerabilities as you write code, with clear remediation guidance so you can fix them before the code is even committed. 
+SonarLint™ is a free IDE extension that lets you fix coding issues before they exist!
 
-SonarLint in Emacs supports analysis of JavaScript, TypeScript, Python, Java, HTML , PHP, Ruby, Scala and XML out of the box!
+Like a spell checker,it highlights Bugs and Security Vulnerabilities as you write code, with clear remediation guidance so you can fix them before the code is even committed. 
+
+In Emacs supports analysis of JavaScript, TypeScript, Python, Java, HTML , PHP, Ruby, Scala and XML out of the box!
 
 :warning: This is not an official [SonarSource](https://www.sonarsource.com/) extension
 
@@ -19,7 +21,7 @@ SonarLint in Emacs supports analysis of JavaScript, TypeScript, Python, Java, HT
 - [ht](https://github.com/Wilfred/ht.el)
 - [dash](https://github.com/magnars/dash.el)
 
-The SonarLint language server needs a Java Runtime (JRE) 8 or 11. If one is already installed on your computer, SonarLint should automatically find and use it.
+The language server needs a Java Runtime (JRE) 8 or 11. If one is already installed on your computer, SonarLint should automatically find and use it.
 
 To analyze JavaScript and TypeScript, SonarLint will also need Node.js.
 
@@ -30,10 +32,15 @@ To analyze JavaScript and TypeScript, SonarLint will also need Node.js.
 Download and include the main file lsp-sonarlint.el and the folders languages and server.
 
 ### Melpa
-WIP
+You can then run the following commands to install lsp-sonarlint:
+
+```
+M-x package-refresh-contents RET      (to refresh your package database)
+M-x package-install RET lsp-sonarlint RET   (to install and compile `lsp-sonarlint` and its dependencies)
+```
 
 ## Usage
-Sonarlint language server relies on java plugins to properly analyze the selected language source code.
+The language server relies on java plugins to properly analyze the selected language source code.
 The basic workflow to activate a plugin for a language is:
 
  - Enable language specific extension, alongside lsp-sonarlint:
@@ -123,7 +130,7 @@ Click [here](https://github.com/SonarSource/sonarlint-vscode/blob/master/telemet
 ## Additional packages
 
 * [lsp-ui](https://github.com/emacs-lsp/lsp-ui) : Flycheck, documentation and code actions support.
-* [company-lsp](https://github.com/tigersoldier/company-lsp) : LSP company backend.
+* [company-capf](https://github.com/company-mode/company-mode) : Completion backend support.
 * [treemacs](https://github.com/Alexander-Miller/treemacs) : Project viewer.
 * [lsp-treemacs](https://github.com/emacs-lsp/lsp-treemacs) : `lsp-mode` GUI controls implemented using treemacs.
 
@@ -131,3 +138,8 @@ Click [here](https://github.com/SonarSource/sonarlint-vscode/blob/master/telemet
 ## Contributions
 
 Contributions are very much welcome.
+
+#### Copyright
+
+SONARLINT and SONARSOURCE are trademarks of SonarSource SA.
+All other trademarks and copyrights are the property of their respective owners.
