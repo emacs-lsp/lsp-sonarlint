@@ -4,8 +4,6 @@
 [![MELPA Stable](https://stable.melpa.org/packages/lsp-sonarlint-badge.svg)](https://stable.melpa.org/#/lsp-sonarlint)
 <a href="https://www.sonarlint.org/"> <img align="right" width="120" src="./images/SonarLint_icon.svg"></a>
 
-
-
 SonarLint™ is a free IDE extension that lets you fix coding issues before they exist!
 
 Like a spell checker,it highlights Bugs and Security Vulnerabilities as you write code, with clear remediation guidance so you can fix them before the code is even committed. 
@@ -64,7 +62,7 @@ the URL defined in **lsp-sonarlint-LANGUAGENAME-download-url**.
 
 
 #### Complete config example
-In this example, we have a multiple language project, with javascript,HTML and PHP:
+In this example, we have a multiple language project, with Javascript Typescript, HTML and PHP:
 
 ``` lisp
 (require 'lsp-sonarlint)
@@ -75,12 +73,14 @@ In this example, we have a multiple language project, with javascript,HTML and P
 (require 'lsp-sonarlint-html)
 (setq lsp-sonarlint-html-enabled t)
 
-
 (require 'lsp-sonarlint-javascript)
 (setq lsp-sonarlint-javascript-enabled t)
 
+(require 'lsp-sonarlint-typescript)
+(setq lsp-sonarlint-typescript-enabled t)
 ``` 
-Now we can active the lsp extension.
+
+Now we can activate the lsp extension.
 
 The extension will check every plugin path and ask if it is not find to download it,
 the default path is defined in **lsp-sonarlint-LANGUAGENAME-analyzer-path**.
@@ -118,8 +118,6 @@ This settigns are common for all the language plugins.
 * `lsp-sonarlint-LANGUAGE-doc-url` - Sonarsource official plugin documentation
 * `lsp-sonarlint-LANGUAGE-repository-url` - Plugin source code
 
-
-
 ## Data and telemetry
 
 This extension collects anonymous usage data and sends it to SonarSource. 
@@ -134,7 +132,6 @@ Click [here](https://github.com/SonarSource/sonarlint-vscode/blob/master/telemet
 * [company-capf](https://github.com/company-mode/company-mode) : Completion backend support.
 * [treemacs](https://github.com/Alexander-Miller/treemacs) : Project viewer.
 * [lsp-treemacs](https://github.com/emacs-lsp/lsp-treemacs) : `lsp-mode` GUI controls implemented using treemacs.
-
 
 ## Contributions
 
