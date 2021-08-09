@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-ruby nil
   "lsp-sonarlint ruby analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-ruby . "1.7.0"))
+  :version '(lsp-sonarlint-ruby . "1.8.3"))
 
 (defcustom lsp-sonarlint-ruby-enabled nil
   "Enable lsp-sonarlint-ruby plugin."
@@ -36,7 +36,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-ruby-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-ruby-plugin/sonar-ruby-plugin-1.7.0.883.jar"
+  "https://binaries.sonarsource.com/Distribution/sonar-ruby-plugin/sonar-ruby-plugin-1.8.3.2219.jar"
   "Ruby plugin download URL."
   :group 'lsp-sonarlint-ruby
   :type 'string)

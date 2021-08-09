@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-javascript nil
   "lsp-sonarlint javascript analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-javascript . "6.2.1"))
+  :version '(lsp-sonarlint-javascript . "8.2.0"))
 
 (defcustom lsp-sonarlint-javascript-enabled nil
   "Enable lsp-sonarlint-javascript plugin."
@@ -36,7 +36,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-javascript-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-javascript-plugin/sonar-javascript-plugin-6.2.1.12157.jar"
+  "https://binaries.sonarsource.com/Distribution/sonar-javascript-plugin/sonar-javascript-plugin-8.2.0.16042.jar"
   "Javascript plugin download URL."
   :group 'lsp-sonarlint-javascript
   :type 'string)
