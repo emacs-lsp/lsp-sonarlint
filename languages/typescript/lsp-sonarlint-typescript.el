@@ -1,7 +1,7 @@
-;;; lsp-sonarlint-javascript.el --- lsp-sonarlint javascript module             -*- lexical-binding: t; -*-
+;;; lsp-sonarlint-typescript.el --- lsp-sonarlint typescript module  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2020  Fermin Munoz
-;; URL: https://gitlab.com/sasanidas/lsp-sonarlint
+;; Copyright (C) 2021  Gueorgui Tcherednitchenko
+;; Author: Gueorgui Tcherednitchenko <gt@gueorgui.net>
 ;; Keywords: languages
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -18,46 +18,42 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Especific configuration for the sonarlint javascript plugin.
+;; Specific configuration for the sonarlint typescript plugin.
 
 ;; This is NOT and official Sonarlint extension.
 
 
 ;;; Code:
 
-(defgroup lsp-sonarlint-javascript nil
-  "lsp-sonarlint javascript analyzer group"
+(defgroup lsp-sonarlint-typescript nil
+  "lsp-sonarlint typescript analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-javascript . "8.2.0"))
+  :version '(lsp-sonarlint-typescript . "8.2.0"))
 
-(defcustom lsp-sonarlint-javascript-enabled nil
-  "Enable lsp-sonarlint-javascript plugin."
-  :group 'lsp-sonarlint-javascript
+(defcustom lsp-sonarlint-typescript-enabled nil
+  "Enable lsp-sonarlint-typescript plugin."
+  :group 'lsp-sonarlint-typescript
   :type 'boolean)
 
-(defcustom lsp-sonarlint-javascript-download-url
+(defcustom lsp-sonarlint-typescript-download-url
   "https://binaries.sonarsource.com/Distribution/sonar-javascript-plugin/sonar-javascript-plugin-8.2.0.16042.jar"
-  "Javascript plugin download URL."
-  :group 'lsp-sonarlint-javascript
+  "Typescript plugin download URL."
+  :group 'lsp-sonarlint-typescript
   :type 'string)
 
-(defcustom lsp-sonarlint-javascript-analyzer-path
+(defcustom lsp-sonarlint-typescript-analyzer-path
 (concat
    (file-name-directory load-file-name)
-   "sonar-javascript.jar")
-  "Lsp-sonarlint javascript analyzer location."
-  :group 'lsp-sonarlint-javascript
+   "sonar-typescript.jar")
+  "Lsp-sonarlint typescript analyzer location."
+  :group 'lsp-sonarlint-typescript
   :type 'file)
 
-(defvar lsp-sonarlint-javascript-doc-url "https://www.sonarsource.com/js/"
+(defvar lsp-sonarlint-typescript-doc-url "https://www.sonarsource.com/ts/"
   "Documentation sonarsource URL.")
 
-(defvar lsp-sonarlint-javascript-repository-url "https://github.com/SonarSource/SonarJS"
+(defvar lsp-sonarlint-typescript-repository-url "https://github.com/SonarSource/SonarJS"
   "Official sonarlint code extension reposiroty.")
 
-
-
-
-
-(provide 'lsp-sonarlint-javascript)
-;;; lsp-sonarlint-javascript.el ends here
+(provide 'lsp-sonarlint-typescript)
+;;; lsp-sonarlint-typescript.el ends here
