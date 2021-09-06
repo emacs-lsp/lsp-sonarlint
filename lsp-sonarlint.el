@@ -83,11 +83,34 @@ Example: `{**/test/**,**/*test*,**/*Test*}`"
   :group 'lsp-sonarlint
   :type 'string)
 
-(defcustom lsp-sonarlint-sonarqube-server-url ""
-  "URL of the server.
-e.g https://<myServerUrl>"
+(defcustom lsp-sonarlint-connections-sonarqube []
+  "Connections to sonarqube instances.
+
+Ex:
+\(setq lsp-sonarlint-connections-sonarqube '[((serverUrl . \"https://...\") (token . \"my-token\"))]\)"
   :group 'lsp-sonarlint
-  :type 'string)
+  :type '(vector (alist :key-type symbol :value-type string)))
+
+(defcustom lsp-sonarlint-connections-sonarcloud []
+  "Connections to sonarcloud instances.
+
+Ex:
+\(setq lsp-sonarlint-connections-sonarqube '[((connectionId . \"my-connection\") (organizationKey . \"my-organization-key\") (token . \"my-token\"))]\)"
+  :group 'lsp-sonarlint
+  :type '(vector (alist :key-type symbol :value-type string)))
+
+(defcustom lsp-sonarlint-servers []
+  ""
+  :group 'lsp-sonarlint
+  :type '(vector (alist :key-type symbol :value-type string)))
+
+(defcustom lsp-sonarlint-project '()
+  "Sonar project configuration.
+
+Ex:
+\(setq lsp-sonarlint-project '((projectKey . \"my-project\"))\)"
+  :group 'lsp-sonarlint
+  :type '(alist :key-type symbol :value-type string))
 
 (defcustom lsp-sonarlint-show-analyzer-logs nil
   "Show analyzer's logs in the SonarLint output."
@@ -163,7 +186,11 @@ analyzer"
  '(("sonarlint.disableTelemetry" lsp-sonarlint-disable-telemetry)
    ("sonarlint.testFilePattern" lsp-sonarlint-test-file-pattern)
    ("sonarlint.output.showAnalyzerLogs" lsp-sonarlint-show-analyzer-logs)
-   ("sonarlint.ls.vmargs" lsp-sonarlint-vmargs)))
+   ("sonarlint.ls.vmargs" lsp-sonarlint-vmargs)
+   ("sonarlint.connectedMode.servers" lsp-sonarlint-servers)
+   ("sonarlint.connectedMode.connections.sonarqube" lsp-sonarlint-connections-sonarqube)
+   ("sonarlint.connectedMode.connections.sonarcloud" lsp-sonarlint-connections-sonarcloud)
+   ("sonarlint.connectedMode.project" lsp-sonarlint-project)))
 
 (lsp-register-client
  (make-lsp-client
