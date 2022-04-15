@@ -7,6 +7,7 @@
 (files "languages" "languages/*/*.el" "server" "server/*")
 
 (source "gnu")
+(source "melpa")
 
 (depends-on "emacs" "25")
 (depends-on "dash" "2.12.0")
