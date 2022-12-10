@@ -2,9 +2,14 @@
          "0.0.1"
          "Emacs Sonarlint lsp client")
 
+(website-url "https://github.com/emacs-lsp/lsp-sonarlint")
+(keywords "languages" "tools" "php" "javascript" "xml" "ruby" "html" "scala" "java" "python")
+
 (package-file "lsp-sonarlint.el")
 
 (files "languages" "languages/*/*.el" "server" "server/*")
+
+(script "test" "echo \"Error: no test specified\" && exit 1")
 
 (source "gnu")
 (source "melpa")
