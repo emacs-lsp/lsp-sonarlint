@@ -27,6 +27,8 @@
 
 (require 'lsp-mode)
 (require 'lsp-sonarlint)
+(load-file (expand-file-name "lsp-sonarlint-test-utils.el"
+                             (file-name-directory (or load-file-name (buffer-file-name)))))
 
 (ert-deftest lsp-sonarlint-plugin-downloaded ()
   "Check whether you have downloaded SonarLint.
@@ -110,17 +112,6 @@ only works for specific textDocument/didOpen:languageId."
   (sort (mapcar (lambda (issue) (gethash "code" issue)) issues) #'string-lessp))
 
 
-(defun lsp-sonarlint--fixtures-dir ()
-  "Directory of the test fixtures for these tests."
-  (concat
-   (file-name-directory
-    (directory-file-name (file-name-directory (symbol-file #'lsp-sonarlint--fixtures-dir))))
-   "fixtures/"))
-
-(defun lsp-sonarlint--sample-file (fname)
-  "Get the full path of the sample file FNAME."
-  (concat (lsp-sonarlint--fixtures-dir) fname))
-
 (defun lsp-sonarlint--get-all-issue-codes (sample-filename &optional major-mode)
   "Get all SonarLint issue-codes for given SAMPLE-FILENAME.
 This functions takes some time to wait for the LSP mode to init
@@ -129,7 +120,7 @@ MAJOR-MODE specifies the major mode enabled to trigger the analysis.
 Some analyzers like cfamily require specific major-modes.
 If nil, use python-mode by default."
   (lsp-sonarlint--exec-with-diags
-   (lsp-sonarlint--sample-file sample-filename)
+   (lsp-sonarlint-sample-file sample-filename)
    (lambda (diags)
      (lsp-sonarlint--get-codes-of-issues diags))
    (if major-mode major-mode 'python-mode)))
@@ -185,7 +176,7 @@ If nil, use python-mode by default."
 
 (ert-deftest lsp-sonarlint-c++-reports-issues ()
   "Check that LSP can get go SonarLint issues for a C++ file."
-  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.cpp" 'c++-mode)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "cpp/sample.cpp" 'c++-mode)
                  '("cpp:S995"))))
 
 (defun lsp-sonarlint--find-descr-action-at-point ()
@@ -217,7 +208,7 @@ If nil, use python-mode by default."
 (ert-deftest lsp-sonarlint-display-rule-descr-test ()
   "Check whether you can display rule description for a SonarLint issue."
   (lsp-sonarlint--exec-with-diags
-   (lsp-sonarlint--sample-file "sample.py")
+   (lsp-sonarlint-sample-file "sample.py")
    (lambda (diags)
      (lsp-sonarlint--go-to-first-diag diags)
      (let ((descr-action (lsp-sonarlint--find-descr-action-at-point)))
