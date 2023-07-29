@@ -3,7 +3,7 @@
          "Emacs Sonarlint lsp client")
 
 (website-url "https://github.com/emacs-lsp/lsp-sonarlint")
-(keywords "languages" "tools" "php" "javascript" "xml" "ruby" "html" "scala" "java" "python")
+(keywords "languages" "tools" "php" "javascript" "xml" "html" "java" "python")
 
 (package-file "lsp-sonarlint.el")
 

@@ -8,7 +8,7 @@ SonarLint™ is a free IDE extension that lets you fix coding issues before they
 
 Like a spell checker,it highlights Bugs and Security Vulnerabilities as you write code, with clear remediation guidance so you can fix them before the code is even committed. 
 
-In Emacs supports analysis of JavaScript, TypeScript, Python, Java, HTML , PHP, Ruby, Scala and XML out of the box!
+In Emacs supports analysis of JavaScript, TypeScript, Python, Java, HTML, PHP, and XML out of the box!
 
 :warning: This is not an official [SonarSource](https://www.sonarsource.com/) extension
 
@@ -96,8 +96,6 @@ Out of the box, SonarLint automatically checks your code against the following r
 - [Java rules](https://rules.sonarsource.com/java)
 - [HTML rules](https://rules.sonarsource.com/html)
 - [PHP rules](https://rules.sonarsource.com/php)
-- [Scala rules](https://rules.sonarsource.com/scala)
-- [Ruby rules](https://rules.sonarsource.com/ruby)
 - [XML rules](https://rules.sonarsource.com/xml)
 
 ## Supported settings
