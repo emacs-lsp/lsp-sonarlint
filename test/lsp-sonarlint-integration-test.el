@@ -68,11 +68,13 @@ It can perform further interaction with LSP, e.g., execute code actions."
         (dir (file-name-directory file))
         (lsp-enable-snippet nil)
         ;; Disable all plugins to focus only on the issues from the knob-symbol
+        (lsp-sonarlint-go-enabled nil)
         (lsp-sonarlint-html-enabled nil)
         (lsp-sonarlint-java-enabled nil)
         (lsp-sonarlint-javascript-enabled nil)
         (lsp-sonarlint-typescript-enabled nil)
         (lsp-sonarlint-php-enabled nil)
+        (lsp-sonarlint-text-enabled nil)
         (lsp-sonarlint-typescript-enabled nil)
         (lsp-sonarlint-xml-enabled nil)
         received-warnings)
@@ -170,6 +172,19 @@ and get the issues from the server."
   (require 'lsp-sonarlint-xml)
   (should (equal (lsp-sonarlint--get-all-issue-codes "sample.xml" 'lsp-sonarlint-xml-enabled)
                  '("xml:S1135"))))
+
+;; "text" plugin detects secrets and bidirectional unicode characters
+(ert-deftest lsp-sonarlint-text-reports-issues ()
+  "Check that LSP can detect Secrets with SonarLint."
+  (require 'lsp-sonarlint-text)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "secrets.java" 'lsp-sonarlint-text-enabled)
+                 '("secrets:S6290" "secrets:S6290" "secrets:S6290"))))
+
+(ert-deftest lsp-sonarlint-go-reports-issues ()
+  "Check that LSP can get go SonarLint issues for a go file."
+  (require 'lsp-sonarlint-go)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.go" 'lsp-sonarlint-go-enabled)
+                 '("go:S1135"))))
 
 (defun lsp-sonarlint--find-descr-action-at-point ()
   "Find the 'get rule description' code action for the issue at point."
