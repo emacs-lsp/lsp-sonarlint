@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-html nil
   "lsp-sonarlint html analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-html . "3.2.0"))
+  :version '(lsp-sonarlint-html . "3.7.1"))
 
 (defcustom lsp-sonarlint-html-enabled nil
   "Enable lsp-sonarlint-html plugin."
@@ -36,8 +36,8 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-html-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-html-plugin/sonar-html-plugin-3.2.0.2082.jar"
-  "Html plugin download URL."
+  "https://repo.maven.apache.org/maven2/org/sonarsource/html/sonar-html-plugin/3.7.1.3306/sonar-html-plugin-3.7.1.3306.jar"
+  "HTML plugin download URL."
   :group 'lsp-sonarlint-html
   :type 'string)
 

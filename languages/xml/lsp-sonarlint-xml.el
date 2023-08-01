@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-xml nil
   "lsp-sonarlint xml analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-xml . "2.0.1"))
+  :version '(lsp-sonarlint-xml . "2.7.0"))
 
 (defcustom lsp-sonarlint-xml-enabled nil
   "Enable lsp-sonarlint-xml plugin."
@@ -36,7 +36,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-xml-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-xml-plugin/sonar-xml-plugin-2.0.1.2020.jar"
+  "https://repo.maven.apache.org/maven2/org/sonarsource/xml/sonar-xml-plugin/2.7.0.3820/sonar-xml-plugin-2.7.0.3820.jar"
   "Xml plugin download URL."
   :group 'lsp-sonarlint-xml
   :type 'string)

@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-typescript nil
   "lsp-sonarlint typescript analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-typescript . "8.2.0"))
+  :version '(lsp-sonarlint-typescript . "10.1.0"))
 
 (defcustom lsp-sonarlint-typescript-enabled nil
   "Enable lsp-sonarlint-typescript plugin."
@@ -36,7 +36,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-typescript-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-javascript-plugin/sonar-javascript-plugin-8.2.0.16042.jar"
+  "https://repo.maven.apache.org/maven2/org/sonarsource/javascript/sonar-javascript-plugin/10.1.0.21143/sonar-javascript-plugin-10.1.0.21143.jar"
   "Typescript plugin download URL."
   :group 'lsp-sonarlint-typescript
   :type 'string)
@@ -44,7 +44,7 @@
 (defcustom lsp-sonarlint-typescript-analyzer-path
 (concat
    (file-name-directory load-file-name)
-   "sonar-typescript.jar")
+   "sonar-javascript.jar") ;; Note: it is the same as for javascript, and that is intentional
   "Lsp-sonarlint typescript analyzer location."
   :group 'lsp-sonarlint-typescript
   :type 'file)

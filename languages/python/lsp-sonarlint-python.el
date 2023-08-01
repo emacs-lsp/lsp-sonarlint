@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-python nil
   "lsp-sonarlint python analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-python . "2.9.0"))
+  :version '(lsp-sonarlint-python . "4.2.0"))
 
 (defcustom lsp-sonarlint-python-enabled nil
   "Enable lsp-sonarlint-python plugin."
@@ -36,7 +36,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-python-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-python-plugin/sonar-python-plugin-2.9.0.6410.jar"
+  "https://repo.maven.apache.org/maven2/org/sonarsource/python/sonar-python-plugin/4.2.0.11487/sonar-python-plugin-4.2.0.11487.jar"
   "Python plugin download URL."
   :group 'lsp-sonarlint-python
   :type 'string)

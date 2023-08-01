@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-java nil
   "lsp-sonarlint java analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-java . "6.4.0"))
+  :version '(lsp-sonarlint-java . "7.18.0"))
 
 (defcustom lsp-sonarlint-java-enabled nil
   "Enable lsp-sonarlint-java plugin."
@@ -36,7 +36,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-java-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-java-plugin/sonar-java-plugin-6.4.0.21967.jar"
+  "https://repo.maven.apache.org/maven2/org/sonarsource/java/sonar-java-plugin/7.18.0.31443/sonar-java-plugin-7.18.0.31443.jar"
   "Java plugin download URL."
   :group 'lsp-sonarlint-java
   :type 'string)
