@@ -1,6 +1,6 @@
 (package "lsp-sonarlint"
          "0.0.1"
-         "Emacs Sonarlint lsp client")
+         "Emacs SonarLint lsp client")
 
 (website-url "https://github.com/emacs-lsp/lsp-sonarlint")
 (keywords "languages" "tools" "php" "javascript" "xml" "html" "java" "python")

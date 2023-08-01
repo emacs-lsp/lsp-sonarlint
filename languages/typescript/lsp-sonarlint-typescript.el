@@ -20,7 +20,7 @@
 ;;; Commentary:
 ;; Specific configuration for the sonarlint typescript plugin.
 
-;; This is NOT and official Sonarlint extension.
+;; This is NOT and official SonarLint extension.
 
 
 ;;; Code:
@@ -53,7 +53,7 @@
   "Documentation sonarsource URL.")
 
 (defvar lsp-sonarlint-typescript-repository-url "https://github.com/SonarSource/SonarJS"
-  "Official sonarlint code extension reposiroty.")
+  "Official sonarlint code extension repository.")
 
 (provide 'lsp-sonarlint-typescript)
 ;;; lsp-sonarlint-typescript.el ends here

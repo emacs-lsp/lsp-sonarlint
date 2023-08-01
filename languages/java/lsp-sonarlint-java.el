@@ -18,9 +18,9 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Especific configuration for the sonarlint java plugin.
+;; Specific configuration for the SonarLint Java plugin.
 
-;; This is NOT and official Sonarlint extension.
+;; This is NOT and official SonarLint extension.
 
 
 ;;; Code:
@@ -53,10 +53,7 @@
   "Documentation sonarsource URL.")
 
 (defvar lsp-sonarlint-java-repository-url "https://github.com/SonarSource/sonar-java"
-  "Official sonarlint code extension reposiroty.")
-
-
-
+  "Official sonarlint code extension repository.")
 
 
 (provide 'lsp-sonarlint-java)

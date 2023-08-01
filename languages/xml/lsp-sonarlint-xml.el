@@ -1,4 +1,4 @@
-;;; lsp-sonarlint-php.el --- lsp-sonarlint xml module             -*- lexical-binding: t; -*-
+;;; lsp-sonarlint-xml.el --- lsp-sonarlint xml module             -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Fermin Munoz
 ;; URL: https://gitlab.com/sasanidas/lsp-sonarlint
@@ -18,9 +18,9 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Especific configuration for the sonarlint xml plugin.
+;; Specific configuration for the SonarLint XML plugin.
 
-;; This is NOT and official Sonarlint extension.
+;; This is NOT and official SonarLint extension.
 
 
 ;;; Code:
@@ -53,10 +53,7 @@
   "Documentation sonarsource URL.")
 
 (defvar lsp-sonarlint-xml-repository-url "https://github.com/SonarSource/sonar-xml"
-  "Official sonarlint code extension reposiroty.")
-
-
-
+  "Official sonarlint code extension repository.")
 
 
 (provide 'lsp-sonarlint-xml)

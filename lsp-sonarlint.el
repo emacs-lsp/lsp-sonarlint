@@ -1,4 +1,4 @@
-;;; lsp-sonarlint.el --- Emacs Sonarlint lsp client              -*- lexical-binding: t; -*-
+;;; lsp-sonarlint.el --- Emacs SonarLint lsp client              -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Fermin Munoz
 
@@ -24,10 +24,10 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Sonarlint LSP extensions for GNU Emacs, add support for the majority of sonarlint languages
+;; SonarLint LSP extensions for GNU Emacs, add support for the majority of sonarlint languages
 ;; including: php, javascript, typescript, html, python and java.
 
-;; This is NOT an official Sonarlint extension.
+;; This is NOT an official SonarLint extension.
 
 
 ;;; Code:
@@ -39,7 +39,7 @@
 (require 'shr)
 
 (defgroup lsp-sonarlint nil
-  "Sonarlint lsp server group"
+  "SonarLint lsp server group"
   :group 'lsp-mode
   :link '(url-link "https://github.com/emacs-lsp/lsp-sonarlint")
   :package-version '(lsp-mode . "6.4"))
@@ -48,7 +48,7 @@
   (concat
    (file-name-directory load-file-name)
    "server/sonarlint-language-server.jar")
-  "Sonarlint Language Server jar file location."
+  "SonarLint Language Server jar file location."
   :group 'lsp-sonarlint
   :type 'file)
 
@@ -60,10 +60,11 @@
                                          rjsx-mode
                                          typescript-mode
                                          typescript-tsx-mode
-                                         python-mode java-mode
+                                         python-mode
+                                         java-mode
                                          xml-mode
                                          nxml-mode)
-  "List of enabled major modes."
+  "List of major modes that enable SonarLint backend for LSP mode."
   :group 'lsp-sonarlint
   :type 'file)
 

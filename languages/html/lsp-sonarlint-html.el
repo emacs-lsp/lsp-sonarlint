@@ -18,9 +18,9 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Especific configuration for the sonarlint html plugin.
+;; Specific configuration for the SonarLint HTML plugin.
 
-;; This is NOT and official Sonarlint extension.
+;; This is NOT and official SonarLint extension.
 
 
 ;;; Code:
@@ -45,7 +45,7 @@
 (concat
    (file-name-directory load-file-name)
    "sonar-html.jar")
-  "Lsp-sonarlint html analyzer location."
+  "Lsp-sonarlint HTML analyzer location."
   :group 'lsp-sonarlint-html
   :type 'file)
 
@@ -53,7 +53,7 @@
   "Documentation sonarsource URL.")
 
 (defvar lsp-sonarlint-html-repository-url "https://github.com/SonarSource/sonar-html"
-  "Official sonarlint code extension reposiroty.")
+  "Official sonarlint code extension repository.")
 
 
 
