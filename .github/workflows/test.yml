@@ -32,11 +32,6 @@ jobs:
         distribution: 'temurin'
         java-version: 11
 
-    - name: Setup NodeJS # for JS and TS analyzer
-      uses: actions/setup-node@v3
-      with:
-        node-version: 16
-
     - uses: jcs090218/setup-emacs@master
       with:
         version: ${{ matrix.emacs-version }}
