@@ -3,11 +3,11 @@ SHELL := /usr/bin/env bash
 EMACS ?= emacs
 EASK ?= eask
 
-TEST-FILES := $(shell ls test/lsp-sonarlint-*.el)
+TEST-FILES := $(shell ls test/*.el)
 
 .PHONY: clean checkdoc lint package install compile test
 
-ci: clean package install compile
+ci: clean package install compile test
 
 package:
 	@echo "Packaging..."
@@ -23,7 +23,7 @@ compile:
 
 test:
 	@echo "Testing..."
-	$(EASK) exec ert-runner -L . $(LOAD-TEST-FILES) -t '!no-win' -t '!org'
+	$(EASK) test ert $(TEST-FILES)
 
 clean:
 	$(EASK) clean all

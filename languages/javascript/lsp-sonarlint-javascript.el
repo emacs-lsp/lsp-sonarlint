@@ -18,9 +18,9 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Especific configuration for the sonarlint javascript plugin.
+;; Specific configuration for the SonarLint Javascript plugin.
 
-;; This is NOT and official Sonarlint extension.
+;; This is NOT and official SonarLint extension.
 
 
 ;;; Code:
@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-javascript nil
   "lsp-sonarlint javascript analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-javascript . "8.2.0"))
+  :version '(lsp-sonarlint-javascript . "10.1.0"))
 
 (defcustom lsp-sonarlint-javascript-enabled nil
   "Enable lsp-sonarlint-javascript plugin."
@@ -36,7 +36,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-javascript-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-javascript-plugin/sonar-javascript-plugin-8.2.0.16042.jar"
+  "https://repo.maven.apache.org/maven2/org/sonarsource/javascript/sonar-javascript-plugin/10.1.0.21143/sonar-javascript-plugin-10.1.0.21143.jar"
   "Javascript plugin download URL."
   :group 'lsp-sonarlint-javascript
   :type 'string)
@@ -53,7 +53,7 @@
   "Documentation sonarsource URL.")
 
 (defvar lsp-sonarlint-javascript-repository-url "https://github.com/SonarSource/SonarJS"
-  "Official sonarlint code extension reposiroty.")
+  "Official sonarlint code extension repository.")
 
 
 

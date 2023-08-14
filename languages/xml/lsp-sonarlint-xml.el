@@ -1,4 +1,4 @@
-;;; lsp-sonarlint-php.el --- lsp-sonarlint xml module             -*- lexical-binding: t; -*-
+;;; lsp-sonarlint-xml.el --- lsp-sonarlint xml module             -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Fermin Munoz
 ;; URL: https://gitlab.com/sasanidas/lsp-sonarlint
@@ -18,9 +18,9 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Especific configuration for the sonarlint xml plugin.
+;; Specific configuration for the SonarLint XML plugin.
 
-;; This is NOT and official Sonarlint extension.
+;; This is NOT and official SonarLint extension.
 
 
 ;;; Code:
@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-xml nil
   "lsp-sonarlint xml analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-xml . "2.0.1"))
+  :version '(lsp-sonarlint-xml . "2.7.0"))
 
 (defcustom lsp-sonarlint-xml-enabled nil
   "Enable lsp-sonarlint-xml plugin."
@@ -36,7 +36,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-xml-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-xml-plugin/sonar-xml-plugin-2.0.1.2020.jar"
+  "https://repo.maven.apache.org/maven2/org/sonarsource/xml/sonar-xml-plugin/2.7.0.3820/sonar-xml-plugin-2.7.0.3820.jar"
   "Xml plugin download URL."
   :group 'lsp-sonarlint-xml
   :type 'string)
@@ -53,10 +53,7 @@
   "Documentation sonarsource URL.")
 
 (defvar lsp-sonarlint-xml-repository-url "https://github.com/SonarSource/sonar-xml"
-  "Official sonarlint code extension reposiroty.")
-
-
-
+  "Official sonarlint code extension repository.")
 
 
 (provide 'lsp-sonarlint-xml)

@@ -18,9 +18,9 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Especific configuration for the sonarlint php plugin.
+;; Specific configuration for the SonarLint PHP plugin.
 
-;; This is NOT and official Sonarlint extension.
+;; This is NOT and official SonarLint extension.
 
 
 ;;; Code:
@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-php nil
   "lsp-sonarlint php analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-php . "3.5.0"))
+  :version '(lsp-sonarlint-php . "3.28.0"))
 
 (defcustom lsp-sonarlint-php-enabled nil
   "Enable lsp-sonarlint-php plugin."
@@ -36,7 +36,7 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-php-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-php-plugin/sonar-php-plugin-3.5.0.5655.jar"
+  "https://repo.maven.apache.org/maven2/org/sonarsource/php/sonar-php-plugin/3.28.0.9490/sonar-php-plugin-3.28.0.9490.jar"
   "Php plugin download URL."
   :group 'lsp-sonarlint-php
   :type 'string)
@@ -53,7 +53,7 @@
   "Documentation sonarsource URL.")
 
 (defvar lsp-sonarlint-php-repository-url "https://github.com/SonarSource/sonar-php"
-  "Official sonarlint code extension reposiroty.")
+  "Official sonarlint code extension repository.")
 
 
 

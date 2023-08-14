@@ -18,9 +18,9 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Especific configuration for the sonarlint html plugin.
+;; Specific configuration for the SonarLint HTML plugin.
 
-;; This is NOT and official Sonarlint extension.
+;; This is NOT and official SonarLint extension.
 
 
 ;;; Code:
@@ -28,7 +28,7 @@
 (defgroup lsp-sonarlint-html nil
   "lsp-sonarlint html analyzer group"
   :group 'lsp-sonarlint
-  :version '(lsp-sonarlint-html . "3.2.0"))
+  :version '(lsp-sonarlint-html . "3.7.1"))
 
 (defcustom lsp-sonarlint-html-enabled nil
   "Enable lsp-sonarlint-html plugin."
@@ -36,8 +36,8 @@
   :type 'boolean)
 
 (defcustom lsp-sonarlint-html-download-url
-  "https://binaries.sonarsource.com/Distribution/sonar-html-plugin/sonar-html-plugin-3.2.0.2082.jar"
-  "Html plugin download URL."
+  "https://repo.maven.apache.org/maven2/org/sonarsource/html/sonar-html-plugin/3.7.1.3306/sonar-html-plugin-3.7.1.3306.jar"
+  "HTML plugin download URL."
   :group 'lsp-sonarlint-html
   :type 'string)
 
@@ -45,7 +45,7 @@
 (concat
    (file-name-directory load-file-name)
    "sonar-html.jar")
-  "Lsp-sonarlint html analyzer location."
+  "Lsp-sonarlint HTML analyzer location."
   :group 'lsp-sonarlint-html
   :type 'file)
 
@@ -53,7 +53,7 @@
   "Documentation sonarsource URL.")
 
 (defvar lsp-sonarlint-html-repository-url "https://github.com/SonarSource/sonar-html"
-  "Official sonarlint code extension reposiroty.")
+  "Official sonarlint code extension repository.")
 
 
 
