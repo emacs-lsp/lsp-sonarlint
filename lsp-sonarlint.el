@@ -4,7 +4,8 @@
 
 ;; Author: Fermin MF <fmfs@posteo.net>
 ;; Created: 13 Jun 2020
-;; Version: 0.0.1
+;; Updated: 20 Sep 2023
+;; Version: 0.0.2
 ;; Keywords: languages, tools, php, javascript, typescript, go, xml, html, java, python
 ;; URL: https://github.com/emacs-lsp/lsp-sonarlint
 ;; Package-Requires: ((emacs "27.1") (dash "2.12.0") (lsp-mode "6.3") (ht "2.3"))
@@ -44,30 +45,72 @@
   :link '(url-link "https://github.com/emacs-lsp/lsp-sonarlint")
   :package-version '(lsp-mode . "6.4"))
 
-(defcustom lsp-sonarlint-server-path
-  (concat
-   (file-name-directory load-file-name)
-   "server/sonarlint-language-server.jar")
-  "SonarLint Language Server jar file location."
+(defcustom lsp-sonarlint-cfamily-enabled t
+  "Enable lsp-sonarlint-cfamily plugin."
   :group 'lsp-sonarlint
-  :type 'file)
+  :type 'boolean)
 
-(defcustom lsp-sonarlint-modes-enabled '(php-mode
-                                         go-mode
-                                         html-mode
-                                         web-mode
-                                         js-mode
-                                         js2-mode
-                                         rjsx-mode
-                                         typescript-mode
-                                         typescript-tsx-mode
-                                         python-mode
-                                         java-mode
-                                         xml-mode
-                                         nxml-mode)
-  "List of major modes that enable SonarLint backend for LSP mode."
+(defcustom lsp-sonarlint-go-enabled t
+  "Enable lsp-sonarlint-go plugin."
   :group 'lsp-sonarlint
-  :type 'file)
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-html-enabled t
+  "Enable lsp-sonarlint-html plugin."
+  :group 'lsp-sonarlint
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-java-enabled t
+  "Enable lsp-sonarlint-java plugin."
+  :group 'lsp-sonarlint
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-javascript-enabled t
+  "Enable lsp-sonarlint-javascript plugin."
+  :group 'lsp-sonarlint
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-php-enabled t
+  "Enable lsp-sonarlint-php plugin."
+  :group 'lsp-sonarlint
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-python-enabled t
+  "Enable lsp-sonarlint-python plugin."
+  :group 'lsp-sonarlint
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-text-enabled t
+  "Enable lsp-sonarlint-text plugin."
+  :group 'lsp-sonarlint
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-typescript-enabled t
+  "Enable lsp-sonarlint-typescript plugin."
+  :group 'lsp-sonarlint
+  :type 'boolean)
+
+(defcustom lsp-sonarlint-xml-enabled t
+  "Enable lsp-sonarlint-xml plugin."
+  :group 'lsp-sonarlint
+  :type 'boolean)
+
+(defun lsp-sonarlint-modes-enabled ()
+  "Get mode list which sonarlint should active."
+  (-mapcat (lambda (mode-dict)
+             (let ((mode-enabled (eval (car mode-dict))))
+               (when mode-enabled
+                 (cdr mode-dict) )))
+           '((lsp-sonarlint-cfamily-enabled . ("c" "cpp" "objective-c" "cuda"))
+             (lsp-sonarlint-go-enabled . ("go"))
+             (lsp-sonarlint-html-enabled . ("html"))
+             (lsp-sonarlint-java-enabled . ("java"))
+             (lsp-sonarlint-javascript-enabled . ("js"))
+             (lsp-sonarlint-php-enabled . ("php"))
+             (lsp-sonarlint-python-enabled . ("python"))
+             (lsp-sonarlint-text-enabled . ("text"))
+             (lsp-sonarlint-typescript-enabled . ("typescript"))
+             (lsp-sonarlint-xml-enabled . ("xml")))))
 
 (defcustom lsp-sonarlint-disable-telemetry t
   "Disable sending anonymous usage statistics to SonarSource.
@@ -99,22 +142,62 @@ e.g. `-Xmx1024m`."
   :group 'lsp-sonarlint
   :type 'string)
 
-(defcustom lsp-sonarlint-server-download-url
-  "https://repox.jfrog.io/repox/sonarsource/org/sonarsource/sonarlint/ls/sonarlint-language-server/2.19.0.72769/sonarlint-language-server-2.19.0.72769.jar"
-  "SonarLint Language Server jar file download URL."
+(lsp-defcustom lsp-sonarlint--compilecommands-path-property ""
+  "Property of compilecommands path."
+  :group 'lsp-sonarlint
+  :lsp-path "sonarlint.pathToCompileCommands")
+
+(defvar lsp-sonarlint--old-compilecommands-path-property ""
+  "Variable for storing old compilecommands.json path.")
+
+(defconst lsp-sonarlint-vscode-plugin-version-hash-tbl
+  '(("3.21.0" . "%2B74430")
+    ("3.20.2" . "%2B74272"))
+  "Alist of vscode plugin and commit hash.")
+
+(defcustom lsp-sonarlint-vscode-plugin-version
+  "3.21.0"
+  "Specify the version of SonarLint VSCode Plugin."
   :group 'lsp-sonarlint
   :type 'string)
+
+(defcustom lsp-sonarlint-vscode-plugin-url
+  (let ((vscode-plugin-version-table (assoc lsp-sonarlint-vscode-plugin-version lsp-sonarlint-vscode-plugin-version-hash-tbl)))
+    (when (null vscode-plugin-version-table)
+      ;; Set default value
+      (setq vscode-plugin-version-table '("3.21.0" . "%2B74430")))
+    (let ((vscode-plugin-version (car vscode-plugin-version-table))
+          (vscode-plugin-hash (cdr vscode-plugin-version-table)))
+      (concat "https://github.com/SonarSource/sonarlint-vscode/releases/download/" vscode-plugin-version vscode-plugin-hash  "/sonarlint-vscode-" vscode-plugin-version ".vsix")))
+  "SonarLint VSCode Plugin VISX file download URL."
+  :group 'lsp-sonarlint
+  :type 'string)
+
+(defcustom lsp-sonarlint-vscode-plugin-store-path
+  (file-name-concat (file-name-directory load-file-name) "sonarlint" "download/")
+  "SonarLint VSCode Plugin VISX file store path."
+  :group 'lsp-sonarlint
+  :type 'string)
+
+(defcustom lsp-sonarlint-vscode-plugin-extract-path
+  (file-name-concat (file-name-directory load-file-name) "sonarlint" "extract/")
+  "SonarLint VSCode Plugin VISX file extract path."
+  :group 'lsp-sonarlint
+  :type 'string)
+
+(defcustom lsp-sonarlint-server-path (let ((server-path (concat lsp-sonarlint-vscode-plugin-extract-path "extension/server/")))
+                                       (if (file-exists-p server-path)
+                                           (car (directory-files (concat lsp-sonarlint-vscode-plugin-extract-path "extension/server/") t ".*\.jar"))
+                                         nil))
+  "SonarLint Language Server jar file location."
+  :group 'lsp-sonarlint
+  :type 'file)
 
 (defcustom lsp-sonarlint-plugin-autodownload nil
   "Whether to go ahead and download missing plugins not asking for a confirmation.
 Useful for batch testing."
   :group 'lsp-sonarlint
   :type 'boolean)
-
-(let ((languages-directory-path (concat (file-name-directory load-file-name) "languages")))
-  (if (file-directory-p languages-directory-path)
-      (add-to-list 'load-path languages-directory-path)
-    (error "There was an error with the `load-file-name` function")))
 
 (defun lsp-sonarlint--remove-duplicate-plugins (jars)
   "Return copy of JARS with duplicates removed.
@@ -123,33 +206,31 @@ for example sonar-javascript.jar covers both JavaScript and TypeScript.
 If a duplicate occurs, SonarLint will throw an exception."
   (cl-remove-duplicates jars :test #'equal :key (lambda (jar-path) (file-name-base jar-path))))
 
+(defun lsp-sonarlint--download-plugins ()
+  "Check if sonarlint vscode plugin exists. If not, download it from web.
+And extract it to `lsp-sonarlint-vscode-plugin-extract-path` specified path."
+  (let* ((vscode-plugin--file-name (file-name-with-extension (file-name-base lsp-sonarlint-vscode-plugin-url) (file-name-extension lsp-sonarlint-vscode-plugin-url)))
+         (vscode-plugin--store-file-path (concat lsp-sonarlint-vscode-plugin-store-path vscode-plugin--file-name)))
+    (unless (file-exists-p lsp-sonarlint-vscode-plugin-store-path)
+      (mkdir lsp-sonarlint-vscode-plugin-store-path t))
+    (unless (file-exists-p vscode-plugin--store-file-path)
+      (when (or lsp-sonarlint-plugin-autodownload
+                (yes-or-no-p
+                 (format "Sonarlint language server plugin not found, do you want to download it? ")))
+        (url-copy-file lsp-sonarlint-vscode-plugin-url vscode-plugin--store-file-path)))
+    (when (file-exists-p lsp-sonarlint-vscode-plugin-extract-path)
+      (delete-directory lsp-sonarlint-vscode-plugin-extract-path t))
+    (unless (file-exists-p lsp-sonarlint-vscode-plugin-extract-path)
+      (mkdir lsp-sonarlint-vscode-plugin-extract-path t))
+    (lsp-unzip vscode-plugin--store-file-path lsp-sonarlint-vscode-plugin-extract-path)))
+
 (defun lsp-sonarlint--plugin-list ()
   "Check for the enabled extensions and return a path list.
 If the analyzer path is not a file, and
 lsp-sonarlint-plugin-autodownload is not nil it offers to
 download the analyzer, and does that."
-  (let* ((lsp-sonarlint--enabled-plugins
-	  (-filter (lambda (member)
-		     (when (eval
-			    (intern (concat (format "%s" (car member) ) "-enabled")))
-		       t))
-		   (custom-group-members 'lsp-sonarlint t))))
-
-    (lsp-sonarlint--remove-duplicate-plugins
-     (-map (lambda (enabled-member)
-             (let* ((enabled-member--download-url
-                     (eval (intern (concat (format "%s" (car enabled-member) ) "-download-url"))))
-                    (enabled-member--analyzer-path
-                     (eval (intern (concat (format "%s" (car enabled-member) ) "-analyzer-path")))))
-               (unless (file-exists-p
-                        enabled-member--analyzer-path)
-                 (when (or lsp-sonarlint-plugin-autodownload
-                           (yes-or-no-p
-                            (format "%s language plugin not found, do you want to download it? "
-                                    (car enabled-member))))
-                   (url-copy-file enabled-member--download-url enabled-member--analyzer-path)))
-               enabled-member--analyzer-path))
-           lsp-sonarlint--enabled-plugins))))
+  (let* ((lsp-sonarlint--analyzers-list (directory-files (concat lsp-sonarlint-vscode-plugin-extract-path "extension/analyzers/") t ".*\.jar")))
+    lsp-sonarlint--analyzers-list))
 
 (defun lsp-sonarlint--code-action-open-rule (_workspace params)
   "Create a buffer with rendered rule from PARAMS text in it.
@@ -166,11 +247,18 @@ temporary buffer."
 
 (defun lsp-sonarlint-server-start-fun (port)
   "Start lsp-sonarlint in TCP mode listening to port PORT."
+  (when (eq lsp-sonarlint-server-path nil)
+    (let ((download-times 1))
+      (unless (or (> download-times 3)
+                 (equal (lsp-sonarlint--download-plugins) 0))
+             (setq download-times (1+ download-times))
+             (delete-directory lsp-sonarlint-vscode-plugin-store-path t)
+             (delete-directory lsp-sonarlint-vscode-plugin-extract-path t)))
+    (setq lsp-sonarlint-server-path (car (directory-files (concat lsp-sonarlint-vscode-plugin-extract-path "extension/server/") t ".*\.jar"))))
   (-concat
-   `("java" "-jar" ,(eval  lsp-sonarlint-server-path)  ,(format "-port=%d" port))
-   (mapcar (lambda (plugin-path) (format "-analyzers=%s" plugin-path))
-           (lsp-sonarlint--plugin-list))))
-
+   `("java" "-jar" ,(eval lsp-sonarlint-server-path)  ,(format "-port=%d" port))
+   '("-analyzers") (mapcar (lambda (plugin-path) (format "%s" plugin-path))
+			   (lsp-sonarlint--plugin-list))))
 
 (defconst lsp-sonarlint--action-handlers '())
 
@@ -179,7 +267,8 @@ temporary buffer."
    ("sonarlint.testFilePattern" lsp-sonarlint-test-file-pattern)
    ("sonarlint.output.showAnalyzerLogs" lsp-sonarlint-show-analyzer-logs)
    ("sonarlint.output.verboseLogs" lsp-sonarlint-verbose-logs)
-   ("sonarlint.ls.vmargs" lsp-sonarlint-vmargs)))
+   ("sonarlint.ls.vmargs" lsp-sonarlint-vmargs)
+   ))
 
 (defun lsp-sonarlint--request-handlers ()
   "SonarLint-specific request handlers.
@@ -204,6 +293,19 @@ See REQUEST-HANDLERS in lsp--client in lsp-mode."
     (puthash "sonarlint/getJavaConfig" (lambda (_workspace _params) nil) ht)
     ht))
 
+(defun lsp-sonarlint--get-compilecommands-path (&optional current-dir)
+  "Return the first found path of compile_commands.json file from `CURRENT-DIR' directory up to parent directories."
+  (unless current-dir
+    (setq current-dir default-directory))
+  (let* ((target-file (file-name-concat current-dir "compile_commands.json"))
+         (parent-dir (file-name-parent-directory current-dir)))
+    (if (and (file-exists-p current-dir)
+             (not (file-exists-p target-file)))
+        (if parent-dir
+            (lsp-sonarlint--get-compilecommands-path parent-dir)
+          (concat (lsp--suggest-project-root) "compile_commands.json"))
+      target-file)))
+
 (defun lsp-sonarlint--notification-handlers ()
   "SonarLint-specific notification handlers.
 See NOTIFICATION-HANDLERS in lsp--client in lsp-mode."
@@ -223,17 +325,41 @@ See NOTIFICATION-HANDLERS in lsp--client in lsp-mode."
     ;; paying attention and will notice anyway.
     (puthash "sonarlint/showNotificationForFirstSecretsIssue" (lambda (_workspace _params) nil) ht)
     (puthash "sonarlint/showRuleDescription" #'lsp-sonarlint--code-action-open-rule ht)
+    ;; Setting initiate value of CompilationDatabase. And setting a hook for updating this value while window changing.
+    (puthash "sonarlint/needCompilationDatabase" (lambda (_workspace _params)
+                                                   (message "Try to set sonarlint.pathToCompileCommands to \"%s\"" (lsp-sonarlint--get-compilecommands-path))
+
+                                                   (with-lsp-workspace _workspace
+                                                     (setq lsp-sonarlint--compilecommands-path-property (lsp-sonarlint--get-compilecommands-path))
+                                                     (lsp--set-configuration (lsp-configuration-section "sonarlint")))
+                                                   (add-hook 'window-state-change-hook 'lsp-sonarlint--window-change-hook)
+                                                   ) ht)
     ht))
+
+(defun lsp-sonarlint--window-change-hook ()
+  "Hook while window has changed."
+  ;; Return if buffer without filename
+  (when (and (buffer-file-name)
+             lsp-mode
+             c-buffer-is-cc-mode)
+    (setq lsp-sonarlint--compilecommands-path-property (lsp-sonarlint--get-compilecommands-path))
+    (when (not (equal lsp-sonarlint--compilecommands-path-property
+                      lsp-sonarlint--old-compilecommands-path-property))
+      (with-lsp-workspace (lsp-find-workspace 'sonarlint (buffer-file-name))
+        (lsp--set-configuration (lsp-configuration-section "sonarlint"))
+        (setq lsp-sonarlint--old-compilecommands-path-property lsp-sonarlint--compilecommands-path-property)
+        (message "Change compilation database to %s" lsp-sonarlint--compilecommands-path-property)))))
 
 (lsp-register-client
  (make-lsp-client
   :new-connection (lsp-tcp-server-command 'lsp-sonarlint-server-start-fun)
-  :major-modes lsp-sonarlint-modes-enabled
+  :activation-fn (lambda (_file-name _mode)
+    (-contains? (lsp-sonarlint-modes-enabled) (lsp-buffer-language)))
   :priority -1
   :request-handlers (lsp-sonarlint--request-handlers)
   :notification-handlers (lsp-sonarlint--notification-handlers)
-  :multi-root t
   :add-on? t
+  :multi-root t
   :server-id 'sonarlint
   :action-handlers (ht<-alist lsp-sonarlint--action-handlers)
   :initialization-options (lambda ()
@@ -242,6 +368,7 @@ See NOTIFICATION-HANDLERS in lsp--client in lsp-mode."
 			     :productName "Emacs"))
   :initialized-fn (lambda (workspace)
                     (with-lsp-workspace workspace
+                      (setq lsp-sonarlint--old-compilecommands-path-property lsp-sonarlint--compilecommands-path-property)
                       (lsp--set-configuration
                        (lsp-configuration-section "sonarlint"))))))
 
