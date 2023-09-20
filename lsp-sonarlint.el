@@ -237,13 +237,20 @@ download the analyzer, and does that."
 Extracts the title ahd htmlDescription, and renders the HTML in a
 temporary buffer."
   (with-temp-buffer
-    (let* ((rule-title (format "<h1>%s</h1><hr/>" (ht-get params "name")))
-           (rule-body (ht-get params "htmlDescription")))
+    (let* ((rule-title (format "<h1>%s</h1>" (ht-get params "name")))
+           (rule-summary (format "%s<hr/>" (ht-get params "htmlDescription")))
+           (rule-body-array (ht-get params "htmlDescriptionTabs")))
       (insert rule-title)
-       (insert "\n")
-       (insert rule-body))
-    (shr-render-buffer (current-buffer))))
+      (insert rule-summary)
+      (insert "\n")
 
+      (seq-doseq (rule-body rule-body-array)
+        (let ((rule-body-title (format "<h2>%s</h2>" (ht-get rule-body "title")))
+             (rule-body-content (format "%s<hr/>" (ht-get (ht-get rule-body "ruleDescriptionTabNonContextual") "htmlContent"))))
+          (insert rule-body-title)
+          (insert "\n")
+          (insert rule-body-content))))
+    (shr-render-buffer (current-buffer))))
 
 (defun lsp-sonarlint-server-start-fun (port)
   "Start lsp-sonarlint in TCP mode listening to port PORT."
