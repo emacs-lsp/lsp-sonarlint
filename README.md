@@ -108,7 +108,7 @@ Out of the box, SonarLint automatically checks your code against the following r
 * `lsp-sonarlint-test-file-pattern` - Regex to find test file, most rules are not evaluated on test files.
 * `lsp-sonarlint-show-analyzer-logs` - Show analyzer logs.
 * `lsp-sonarlint-verbose-logs` - Make SonarLint logs verbose.
-* `lsp-sonarlint-server-download-url` - SonarLint server download URL.
+* `lsp-sonarlint-vscode-plugin-url` - SonarLint language server download URL.
 * `lsp-sonarlint-plugin-autodownload` - Not ask for confirmation and download analyzers if they are missing.
 
 ### Plugins supported settings
