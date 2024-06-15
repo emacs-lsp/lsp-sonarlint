@@ -286,20 +286,30 @@ temporary buffer."
 i.e folders starting with '.' will be ignored"
   (not (string= (substring (file-name-base dirname) 0 1) ".")))
 
+(defun lsp-sonarlint--invalid-file-name-encoding(file-path)
+  "Return t if the file-path is not encodable as UTF-8.
+This is important since emacs does not support non UTF-8 json serialization,
+so a stray accentuated character encoded in a legacy filename in 8859-1
+will raise an error for the whole project."
+  (cl-some (lambda (ch)
+             (not (encode-coding-char ch 'utf-8 'unicode)))
+           file-path))
+
 (defun lsp-sonarlint--list-files-in-folder (workspace _params)
   "Respond to a listFilesInFolder request.
 List all files of interest in WORKSPACE's directory.
 See `lsp-sonarlint-analyze-folder' to see which files are ignored."
   (let* ((root-dir (lsp--workspace-root workspace))
-         (files (directory-files-recursively root-dir ".*" nil 'lsp-sonarlint--analyze-folder)))
+         (files (directory-files-recursively root-dir ".*" nil 'lsp-sonarlint--analyze-folder))
+         (utf8-filenames (cl-remove-if #'lsp-sonarlint--invalid-file-name-encoding files)))
     (lsp-ht
      ("foundFiles"
-       (apply 'vector
-              (mapcar (lambda(file)
-                        (lsp-ht
-                         ("fileName" (file-name-nondirectory file))
-                         ("filePath" file)))
-                      files))))))
+      (apply 'vector
+             (mapcar (lambda(file)
+                       (lsp-ht
+                        ("fileName" (file-name-nondirectory file))
+                        ("filePath" file)))
+                     utf8-filenames))))))
 
 (defvar lsp-sonarlint--action-handlers '())
 
