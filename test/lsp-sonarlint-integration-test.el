@@ -51,12 +51,14 @@ If that does not happen within TIMEOUT, throw an error."
     (while (lsp-sonarlint--any-alive-workspaces-p)
       (accept-process-output nil 0.1))))
 
-(defun lsp-sonarlint--exec-with-diags (file knob-symbol diag-consumer)
-  "Execute DIAG-CONSUMER in the buffer holding FILE with KNOB-SYMBOL enabled.
+(defun lsp-sonarlint--exec-with-diags (file diag-consumer major-mode)
+  "Execute DIAG-CONSUMER in the buffer holding FILE.
 DIAG-CONSUMER is executed once LSP has some diagnostics for the file,
 in the LSP-enabled buffer.
 DIAG-CONSUMER must accept 1 argument - the list of diagnostics.
-It can perform further interaction with LSP, e.g., execute code actions."
+It can perform further interaction with LSP, e.g., execute code actions.
+The MAJOR-MODE triggering the analysis matters, because the cfamily analyzer
+only works for specific textDocument/didOpen:languageId."
   ;; It is important to start from a clean slate.
   ;; If lsp-mode runs any servers already, the test might fall into a race condition,
   ;; when a server was requested to stop, but did not quite shut down yet,
@@ -67,19 +69,10 @@ It can perform further interaction with LSP, e.g., execute code actions."
         (lsp-keep-workspace-alive nil)
         (dir (file-name-directory file))
         (lsp-enable-snippet nil)
-        ;; Disable all plugins to focus only on the issues from the knob-symbol
-        (lsp-sonarlint-go-enabled nil)
-        (lsp-sonarlint-html-enabled nil)
-        (lsp-sonarlint-java-enabled nil)
-        (lsp-sonarlint-javascript-enabled nil)
-        (lsp-sonarlint-typescript-enabled nil)
-        (lsp-sonarlint-php-enabled nil)
-        (lsp-sonarlint-text-enabled nil)
-        (lsp-sonarlint-typescript-enabled nil)
-        (lsp-sonarlint-xml-enabled nil)
         received-warnings)
     (let ((buf (find-file-noselect file))
           (lsp-sonarlint-plugin-autodownload t)
+          (diagnostics-updated nil)
           (register-warning (lambda (&rest w) (when (equal (car w) 'lsp-mode)
                                            (push (cadr w) received-warnings)))))
       (unwind-protect
@@ -87,18 +80,17 @@ It can perform further interaction with LSP, e.g., execute code actions."
             (advice-add 'display-warning :before register-warning)
             (lsp-workspace-folders-add dir)
             (with-current-buffer buf
-              (cl-letf (((symbol-value knob-symbol) t))
-                (python-mode) ;; Any prog mode that triggers lsp-sonarlint triggers all its analyzers
-                (lsp))
+              (funcall major-mode)
+              (lsp)
               (lsp-sonarlint--wait-for
                (lambda ()
                  (when-let ((stats (lsp-diagnostics-stats-for file)))
                    (when (< 0 (seq-reduce '+ stats 0))
-                     (setq diagnostics-updated t))))
+                     (setq diagnostics-updated (gethash file (lsp-diagnostics t))))))
                'lsp-diagnostics-updated-hook
                40)
               (should (null received-warnings))
-              (funcall diag-consumer (gethash file (lsp-diagnostics t)))))
+              (funcall diag-consumer diagnostics-updated)))
         (kill-buffer buf)
         (lsp-workspace-folders-remove dir)
         (advice-remove 'display-warning register-warning)
@@ -120,71 +112,72 @@ It can perform further interaction with LSP, e.g., execute code actions."
   "Get the full path of the sample file FNAME."
   (concat (lsp-sonarlint--fixtures-dir) fname))
 
-(defun lsp-sonarlint--get-all-issue-codes (sample-filename knob-symbol)
-  "Get all SonarLint issue-codes for given SAMPLE-FILENAME with KNOB-SYMBOL on.
+(defun lsp-sonarlint--get-all-issue-codes (sample-filename &optional major-mode)
+  "Get all SonarLint issue-codes for given SAMPLE-FILENAME.
 This functions takes some time to wait for the LSP mode to init
-and get the issues from the server."
+and get the issues from the server.
+MAJOR-MODE specifies the major mode enabled to trigger the analysis.
+Some analyzers like cfamily require specific major-modes.
+If nil, use python-mode by default."
   (lsp-sonarlint--exec-with-diags
-   (lsp-sonarlint--sample-file sample-filename) knob-symbol
+   (lsp-sonarlint--sample-file sample-filename)
    (lambda (diags)
-     (lsp-sonarlint--get-codes-of-issues diags))))
+     (lsp-sonarlint--get-codes-of-issues diags))
+   (if major-mode major-mode 'python-mode)))
 
 (ert-deftest lsp-sonarlint-python-reports-issues ()
   "Check that LSP can get Python SonarLint issues for a Python file."
-  (require 'lsp-sonarlint-python)
-  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.py" 'lsp-sonarlint-python-enabled)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.py")
                  '("python:S1135" "python:S1716"))))
 
 (ert-deftest lsp-sonarlint-java-reports-issues ()
   "Check that LSP can get Java SonarLint issues for a Java file."
-  (require 'lsp-sonarlint-java)
-  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.java" 'lsp-sonarlint-java-enabled)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.java")
                  '("java:S106" "java:S1135" "java:S1220"))))
 
 (ert-deftest lsp-sonarlint-html-reports-issues ()
   "Check that LSP can get HTML SonarLint issues for an HTML file."
-  (require 'lsp-sonarlint-html)
-  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.html" 'lsp-sonarlint-html-enabled)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.html")
                  '("Web:S1135"))))
 
 ;; javascript-sample.js must have a distinct name from sample.ts,
 ;; otherwise the javascript/typescript plugin gets confused.
 (ert-deftest lsp-sonarlint-js-reports-issues ()
   "Check that LSP can get JavaScript SonarLint issues for a JavaScript file."
-  (require 'lsp-sonarlint-javascript)
-  (should (equal (lsp-sonarlint--get-all-issue-codes "javascript-sample.js" 'lsp-sonarlint-javascript-enabled)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "javascript-sample.js")
                  '("javascript:S1134" "javascript:S1135"))))
 
 (ert-deftest lsp-sonarlint-ts-reports-issues ()
   "Check that LSP can get TypeScript SonarLint issues for a TypeScript file."
-  (require 'lsp-sonarlint-typescript)
-  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.ts" 'lsp-sonarlint-typescript-enabled)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.ts")
                  '("typescript:S1134" "typescript:S1135"))))
 
 (ert-deftest lsp-sonarlint-php-reports-issues ()
   "Check that LSP can get PHP SonarLint issues for a PHP file."
-  (require 'lsp-sonarlint-php)
-  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.php" 'lsp-sonarlint-php-enabled)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.php")
                  '("php:S1135" "php:S1780"))))
 
 (ert-deftest lsp-sonarlint-xml-reports-issues ()
   "Check that LSP can get XML SonarLint issues for a XML file."
-  (require 'lsp-sonarlint-xml)
-  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.xml" 'lsp-sonarlint-xml-enabled)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.xml")
                  '("xml:S1135"))))
 
 ;; "text" plugin detects secrets and bidirectional unicode characters
 (ert-deftest lsp-sonarlint-text-reports-issues ()
   "Check that LSP can detect Secrets with SonarLint."
-  (require 'lsp-sonarlint-text)
-  (should (equal (lsp-sonarlint--get-all-issue-codes "secrets.java" 'lsp-sonarlint-text-enabled)
-                 '("secrets:S6290" "secrets:S6290" "secrets:S6290"))))
+  (let ((lsp-sonarlint-enabled-analyzers '("text")))
+    (should (equal (lsp-sonarlint--get-all-issue-codes "secrets.java")
+                   '("secrets:S6290" "secrets:S6290" "secrets:S6290")))))
 
 (ert-deftest lsp-sonarlint-go-reports-issues ()
   "Check that LSP can get go SonarLint issues for a go file."
-  (require 'lsp-sonarlint-go)
-  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.go" 'lsp-sonarlint-go-enabled)
+  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.go")
                  '("go:S1135"))))
+
+(ert-deftest lsp-sonarlint-c++-reports-issues ()
+  "Check that LSP can get go SonarLint issues for a C++ file."
+  (should (equal (lsp-sonarlint--get-all-issue-codes "sample.cpp" 'c++-mode)
+                 '("cpp:S995"))))
 
 (defun lsp-sonarlint--find-descr-action-at-point ()
   "Find the 'get rule description' code action for the issue at point."
@@ -214,10 +207,8 @@ and get the issues from the server."
 
 (ert-deftest lsp-sonarlint-display-rule-descr-test ()
   "Check whether you can display rule description for a SonarLint issue."
-  (require 'lsp-sonarlint-python)
   (lsp-sonarlint--exec-with-diags
    (lsp-sonarlint--sample-file "sample.py")
-   'lsp-sonarlint-python-enabled
    (lambda (diags)
      (lsp-sonarlint--go-to-first-diag diags)
      (let ((descr-action (lsp-sonarlint--find-descr-action-at-point)))
@@ -229,10 +220,12 @@ and get the issues from the server."
            (unwind-protect
                (progn
                  (advice-add 'shr-render-buffer :before #'check-opened-buffer)
+                 (sit-for 1)
                  (lsp-execute-code-action descr-action)
                  (with-timeout (8 (error "Timeout waiting for rule description"))
                    (while (not description-opened)
                      (message "still waiting")
                      (sit-for 0.1)))
                  (should description-opened))
-             (advice-remove 'shr-render-buffer #'check-opened-buffer))))))))
+             (advice-remove 'shr-render-buffer #'check-opened-buffer))))))
+   'python-mode))

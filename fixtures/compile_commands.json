@@ -1,0 +1,8 @@
+[
+{
+  "directory": ".",
+  "command": "/usr/bin/c++ sample.cpp",
+  "file": "sample.cpp",
+  "output": "dummy"
+}
+]
