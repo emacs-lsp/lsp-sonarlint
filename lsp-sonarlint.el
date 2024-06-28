@@ -45,11 +45,14 @@
   :package-version '(lsp-mode . "6.4"))
 
 (defcustom lsp-sonarlint-download-url
-  (format "https://github.com/SonarSource/sonarlint-vscode/releases/download/4.6.0%%2B76435/sonarlint-vscode%s-4.6.0.vsix"
+  (format "https://github.com/SonarSource/sonarlint-vscode/releases/download/4.6.0%%2B76435/sonarlint-vscode-%s-4.6.0.vsix"
           (pcase system-type
-            ('gnu/linux "-linux-x64")
-            ('darwin "-darwin-arm64")
-            ('windows-nt "-win32-x64")))
+            ('gnu/linux "linux-x64")
+            ('darwin
+             (pcase (lsp-resolve-value lsp--system-arch)
+               ('x64     "darwin-x64")
+               ('arm64   "darwin-arm64")))
+            ('windows-nt "win32-x64")))
   "Official SonarLint VSCode extension (vsix).
 It contains the necessary language server and analyzers."
   :type 'string)
