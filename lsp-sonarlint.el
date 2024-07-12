@@ -24,7 +24,7 @@
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; SonarLint LSP extensions for GNU Emacs, add support for the majority of sonarlint languages
+;; SonarLint LSP extensions for GNU Emacs, add support for the majority of SonarLint languages
 ;; including: php, javascript, typescript, html, python and java.
 
 ;; This is NOT an official SonarLint extension.
@@ -59,7 +59,7 @@ It contains the necessary language server and analyzers."
 
 (defcustom lsp-sonarlint-download-dir
   (concat (file-name-directory load-file-name) "sonarlint-vscode")
-  "Location where VSCode's sonarlint extension should be found.
+  "Location where VSCode's SonarLint extension should be found.
 If absent, it will be downloaded from github and unzipped there."
   :group 'lsp-sonarlint
   :type 'directory)
@@ -88,7 +88,7 @@ If absent, it will be downloaded from github and unzipped there."
   :type 'file)
 
 (defcustom lsp-sonarlint-disable-telemetry t
-  "Disable sending anonymous usage statistics to SonarSource.
+  "Disable sending anonymous usage statistics to Sonar.
 To see a sample of the data that are collected
 https://github.com/SonarSource/sonarlint-vscode/blob/master/telemetry-sample.md."
   :group 'lsp-sonarlint
@@ -125,64 +125,64 @@ It is needed in C/C++ to provide your compilation options."
   :type 'file)
 
 (defconst lsp-sonarlint-go-doc-url "https://www.sonarsource.com/go/"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-go-repository-url "https://github.com/SonarSource/slang/"
-  "Official sonarlint code extension repository.")
+  "Official SonarLint code extension repository.")
 
 (defconst lsp-sonarlint-html-doc-url "https://www.sonarsource.com/html/"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-html-repository-url "https://github.com/SonarSource/sonar-html"
-  "Official sonarlint code extension repository.")
+  "Official SonarLint code extension repository.")
 
 (defconst lsp-sonarlint-java-doc-url "https://www.sonarsource.com/java/"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-java-repository-url "https://github.com/SonarSource/sonar-java"
-  "Official sonarlint code extension repository.")
+  "Official SonarLint code extension repository.")
 
 (defconst lsp-sonarlint-c-doc-url "https://www.sonarsource.com/c"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-c++-doc-url "https://www.sonarsource.com/cpp"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-javascript-doc-url "https://www.sonarsource.com/js/"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-javascript-repository-url "https://github.com/SonarSource/SonarJS"
-  "Official sonarlint code extension repository.")
+  "Official SonarLint code extension repository.")
 
 (defconst lsp-sonarlint-php-doc-url "https://www.sonarsource.com/php/"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-php-repository-url "https://github.com/SonarSource/sonar-php"
-  "Official sonarlint code extension repository.")
+  "Official SonarLint code extension repository.")
 
 (defconst lsp-sonarlint-python-doc-url "https://www.sonarsource.com/python/"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-python-repository-url "https://github.com/SonarSource/sonar-python"
-  "Official sonarlint code extension repository.")
+  "Official SonarLint code extension repository.")
 
 (defconst lsp-sonarlint-text-doc-url "https://www.sonarsource.com/"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-text-repository-url "https://github.com/SonarSource/sonar-text"
-  "Official sonarlint code extension repository.")
+  "Official SonarLint code extension repository.")
 
 (defconst lsp-sonarlint-typescript-doc-url "https://www.sonarsource.com/ts/"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-typescript-repository-url "https://github.com/SonarSource/SonarJS"
-  "Official sonarlint code extension repository.")
+  "Official SonarLint code extension repository.")
 
 (defconst lsp-sonarlint-xml-doc-url "https://www.sonarsource.com/xml/"
-  "Documentation sonarsource URL.")
+  "Documentation Sonar URL.")
 
 (defconst lsp-sonarlint-xml-repository-url "https://github.com/SonarSource/sonar-xml"
-  "Official sonarlint code extension repository.")
+  "Official SonarLint code extension repository.")
 
 (defun lsp-sonarlint-download()
   "Download the VSCode extension and unzips it.
@@ -199,7 +199,7 @@ Follows the customizable variables : `lsp-sonarlint-download-url' and
       (if (file-exists-p lsp-sonarlint-download-dir)
           (progn
             (delete-file vsix-path)
-            (message "Sonarlint : successfully downloaded to %s" lsp-sonarlint-download-dir))
+            (message "SonarLint : successfully downloaded to %s" lsp-sonarlint-download-dir))
 
         ;; For unzip issues on windows, see https://github.com/emacs-lsp/lsp-mode/issues/3022
         (warn "Could not unzip the VSCode extension, Either :\n\
@@ -213,7 +213,7 @@ See also `lsp-sonarlint-download-dir' and `lsp-sonarlint-download-url'."
   :group 'lsp-sonarlint
   :set (lambda (sym auto-download) ; Trigger download when set to non-nil
          (set sym auto-download)
-	     (when auto-download
+         (when auto-download
            (lsp-sonarlint-download)))
   :group 'lsp-sonarlint
   :type 'boolean)
@@ -258,7 +258,7 @@ See `lsp-sonarlint-available-analyzers' and `lsp-sonarlint-enabled-analyzers'"
       (_ (seq-contains-p lsp-sonarlint-enabled-analyzers analyzer-name)))))
 
 (defun lsp-sonarlint-server-start-fun()
-  "Start lsp-sonarlint in stdio mode."
+  "Start lsp-SonarLint in stdio mode."
   (let* ((root-dir lsp-sonarlint-download-dir)
          (bundled-java-path (car (directory-files-recursively root-dir "java\\(.exe\\)?$")))
          (java-path (if lsp-sonarlint-use-system-jre "java" bundled-java-path))
@@ -337,15 +337,15 @@ See `lsp-sonarlint-analyze-folder' to see which files are ignored."
    ("sonarlint/shouldAnalyseFile" (lambda (&rest _)
                                     (lsp-ht
                                      ("shouldBeAnalysed" t))))
-   ;; Sonarlint sends those before to ask if you want to display a notification
+   ;; SonarLint sends those before to ask if you want to display a notification
    ;; On what your environement is missing. e.g If you have an old version of nodejs.
    ("sonarlint/canShowMissingRequirementsNotification" (lambda (&rest _) t))
-   ;; For some reason, sonarlint requests the list of files in the folder
+   ;; For some reason, SonarLint requests the list of files in the folder
    ;; VSCode's extension seems to send everything, even the .git folder.
    ;; Here we give anything stored inside of the root directory, except
    ;; hidden folders (in the unix sense, those which start with '.')
    ("sonarlint/listFilesInFolder" #'lsp-sonarlint--list-files-in-folder)
-   ;; Sonarlint VSCode extension has a setting to specify a glob pattern
+   ;; SonarLint VSCode extension has a setting to specify a glob pattern
    ;; of files to be excluded from analysis.
    ;; We do not support this option at the moment, do not filter anything.
    ("sonarlint/filterOutExcludedFiles" (lambda (_ params) params))
@@ -373,7 +373,7 @@ See REQUEST-HANDLERS in lsp--client in lsp-mode."
    ;; TODO: display them, perhaps optionally, as they could be noisy sometimes,
    ;; especially without the possibility to "review" them once and forever.
    ("sonarlint/publishSecurityHotspots" #'ignore)
-   ;; Sonarlint sends this to suggest the connected mode, and sends along
+   ;; SonarLint sends this to suggest the connected mode, and sends along
    ;; your previous sonar projects. Connected mode is not currently implemented here.
    ("sonarlint/suggestConnection" #'ignore)
    ;; Not sure what this is for. Testing of SonarLint itself?
