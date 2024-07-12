@@ -213,7 +213,7 @@ See also `lsp-sonarlint-download-dir' and `lsp-sonarlint-download-url'."
   :group 'lsp-sonarlint
   :set (lambda (sym auto-download) ; Trigger download when set to non-nil
          (set sym auto-download)
-	     (when auto-download
+         (when auto-download
            (lsp-sonarlint-download)))
   :group 'lsp-sonarlint
   :type 'boolean)
