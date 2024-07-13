@@ -17,6 +17,7 @@
 
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
+;; Package-Requires: ((emacs "27.2"))
 
 ;;; Commentary:
 ;; Tests for the integration of the LSP mode and SonarLint language server
@@ -180,7 +181,7 @@ If nil, use python-mode by default."
                  '("cpp:S995"))))
 
 (defun lsp-sonarlint--find-descr-action-at-point ()
-  "Find the 'get rule description' code action for the issue at point."
+  "Find the `get rule description' code action for the issue at point."
   (seq-find (lambda (action) (string-match-p "description" (gethash "title" action)))
             (lsp-code-actions-at-point)))
 
@@ -213,19 +214,22 @@ If nil, use python-mode by default."
      (lsp-sonarlint--go-to-first-diag diags)
      (let ((descr-action (lsp-sonarlint--find-descr-action-at-point)))
        (let ((description-opened nil))
-         (cl-flet ((check-opened-buffer
-                    (buf)
-                    (when (lsp-sonarlint--buf-has-rule-descr-p buf)
-                      (setq description-opened t))))
+         (cl-flet ((check-opened-buffer (buf)
+                     (when (lsp-sonarlint--buf-has-rule-descr-p buf)
+                       (setq description-opened t))))
            (unwind-protect
                (progn
                  (advice-add 'shr-render-buffer :before #'check-opened-buffer)
-                 (sit-for 1)
-                 (lsp-execute-code-action descr-action)
                  (with-timeout (8 (error "Timeout waiting for rule description"))
                    (while (not description-opened)
+                     ;; Repeat the request multiple times because SonarLint
+                     ;; might get distracted with other requests and "forget" to
+                     ;; respond
+                     (lsp-execute-code-action descr-action)
                      (message "still waiting")
-                     (sit-for 0.1)))
+                     (sit-for 0.3)))
                  (should description-opened))
              (advice-remove 'shr-render-buffer #'check-opened-buffer))))))
    'python-mode))
+
+;;; integration.el ends here
