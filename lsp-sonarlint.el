@@ -87,35 +87,40 @@ If absent, it will be downloaded from github and unzipped there."
   :group 'lsp-sonarlint
   :type 'file)
 
-(defcustom lsp-sonarlint-disable-telemetry t
+(defcustom-lsp lsp-sonarlint-disable-telemetry t
   "Disable sending anonymous usage statistics to SonarSource.
 To see a sample of the data that are collected
 https://github.com/SonarSource/sonarlint-vscode/blob/master/telemetry-sample.md."
   :group 'lsp-sonarlint
-  :type 'boolean)
+  :type 'boolean
+  :lsp-path "sonarlint.disableTelemetry")
 
-(defcustom lsp-sonarlint-test-file-pattern "{**/test/**,**/*test*,**/*Test*}"
+(defcustom-lsp lsp-sonarlint-test-file-pattern "{**/test/**,**/*test*,**/*Test*}"
   "Files whose name match java global are considered as test files by analyzers.
 Most rules are not evaluated on test files.
 Example: `{**/test/**,**/*test*,**/*Test*}`"
   :group 'lsp-sonarlint
-  :type 'string)
+  :type 'string
+  :lsp-path "sonarlint.testFilePattern")
 
-(defcustom lsp-sonarlint-show-analyzer-logs nil
+(defcustom-lsp lsp-sonarlint-show-analyzer-logs nil
   "Show analyzer's logs in the SonarLint output."
   :group 'lsp-sonarlint
-  :type 'boolean)
+  :type 'boolean
+  :lsp-path "sonarlint.output.showAnalyzerLogs")
 
-(defcustom lsp-sonarlint-verbose-logs nil
+(defcustom-lsp lsp-sonarlint-verbose-logs nil
   "Enable verbose logging of the SonarLint language server."
   :group 'lsp-sonarlint
-  :type 'boolean)
+  :type 'boolean
+  :lsp-path "sonarlint.output.verboseLogs")
 
-(defcustom lsp-sonarlint-vmargs ""
+(defcustom-lsp lsp-sonarlint-vmargs ""
   "Extra JVM arguments used to launch the SonarLint LSP.
 e.g. `-Xmx1024m`."
   :group 'lsp-sonarlint
-  :type 'string)
+  :type 'string
+  :lsp-path "sonarlint.ls.vmargs")
 
  (defun lsp-sonarlint--find-file-in-parent-folders (fname)
    "Find the closest FNAME in a buffer folder or one of its parents.
@@ -350,13 +355,6 @@ See `lsp-sonarlint-analyze-folder' to see which files are ignored."
                      utf8-filenames))))))
 
 (defvar lsp-sonarlint--action-handlers '())
-
-(lsp-register-custom-settings
- '(("sonarlint.disableTelemetry" lsp-sonarlint-disable-telemetry)
-   ("sonarlint.testFilePattern" lsp-sonarlint-test-file-pattern)
-   ("sonarlint.output.showAnalyzerLogs" lsp-sonarlint-show-analyzer-logs)
-   ("sonarlint.output.verboseLogs" lsp-sonarlint-verbose-logs)
-   ("sonarlint.ls.vmargs" lsp-sonarlint-vmargs)))
 
 (defvar lsp-sonarlint--request-handlers
   (lsp-ht
