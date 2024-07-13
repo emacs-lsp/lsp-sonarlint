@@ -28,6 +28,15 @@
 (require 'lsp-mode)
 (require 'lsp-sonarlint)
 
+(ert-deftest lsp-sonarlint-plugin-downloaded ()
+  "Check whether you have downloaded SonarLint.
+
+This is a prerequisite for all the integration tests. If this
+test fails, you need to download the SonarLint plugin using
+
+make download-sonarlint"
+  (should (file-exists-p (concat lsp-sonarlint-download-dir "/extension/server/sonarlint-ls.jar"))))
+
 (defun lsp-sonarlint--wait-for (predicate hook timeout)
   "Register PREDICATE to run on HOOK, and wait until it returns t.
 If that does not occur before TIMEOUT, throw an error."
@@ -72,7 +81,6 @@ only works for specific textDocument/didOpen:languageId."
         (lsp-enable-snippet nil)
         received-warnings)
     (let ((buf (find-file-noselect file))
-          (lsp-sonarlint-plugin-autodownload t)
           (diagnostics-updated nil)
           (register-warning (lambda (&rest w) (when (equal (car w) 'lsp-mode)
                                            (push (cadr w) received-warnings)))))
