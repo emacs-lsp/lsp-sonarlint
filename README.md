@@ -143,6 +143,54 @@ Click [here](https://github.com/SonarSource/sonarlint-vscode/blob/master/telemet
 * [treemacs](https://github.com/Alexander-Miller/treemacs) : Project viewer.
 * [lsp-treemacs](https://github.com/emacs-lsp/lsp-treemacs) : `lsp-mode` GUI controls implemented using treemacs.
 
+## Development
+
+### Prerequisites
+
+You will need `make` and [`eask`](https://emacs-eask.github.io/) to run `lsp-sonarlint` tests.
+See also (Requirements)(#requirements) section.
+
+If you do not have `eask` installed, you can install it locally with:
+
+``` shell
+npm install @emacs-eask/cli
+export EASK="$PWD/node_modules/@emacs-eask/cli/eask"
+```
+
+Or globally with:
+
+``` shell
+npm install -g @emacs-eask/cli
+```
+
+### Testing
+
+We use [Emacs ERT](https://www.gnu.org/software/emacs/manual/html_node/ert/) for testing.
+You can run tests with:
+
+``` shell
+make package
+make install
+make compile
+make download-sonarlint
+make test
+```
+
+#### Interactive Testing
+
+You can also run the tests one-by-one interactively.
+
+Open a test file from tests/*.el in Emacs.
+Evaluate the file contents (`eval-buffer`) to load test definitions into the session.
+Run `ert` command to run all or selected tests.
+To run the integration tests, you will have to shut down all your lsp workspaces
+to ensure consistent starting state.
+
+Check out `*lsp-log*`, `*lsp-log: sonarlint:NNNNNNNN*`, `*sonarlint*`, `*sonarlint:stderr*`
+for logs when troubleshooting a test.
+
+You can start with test/trivial-test.el to check that your testing harness works.
+
 ## Contributions
 
 Contributions are very much welcome.

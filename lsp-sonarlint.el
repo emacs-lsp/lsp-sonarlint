@@ -87,42 +87,77 @@ If absent, it will be downloaded from github and unzipped there."
   :group 'lsp-sonarlint
   :type 'file)
 
-(defcustom lsp-sonarlint-disable-telemetry t
+(defcustom-lsp lsp-sonarlint-disable-telemetry t
   "Disable sending anonymous usage statistics to SonarSource.
 To see a sample of the data that are collected
 https://github.com/SonarSource/sonarlint-vscode/blob/master/telemetry-sample.md."
   :group 'lsp-sonarlint
-  :type 'boolean)
+  :type 'boolean
+  :lsp-path "sonarlint.disableTelemetry")
 
-(defcustom lsp-sonarlint-test-file-pattern "{**/test/**,**/*test*,**/*Test*}"
+(defcustom-lsp lsp-sonarlint-test-file-pattern "{**/test/**,**/*test*,**/*Test*}"
   "Files whose name match java global are considered as test files by analyzers.
 Most rules are not evaluated on test files.
 Example: `{**/test/**,**/*test*,**/*Test*}`"
   :group 'lsp-sonarlint
-  :type 'string)
+  :type 'string
+  :lsp-path "sonarlint.testFilePattern")
 
-(defcustom lsp-sonarlint-show-analyzer-logs nil
+(defcustom-lsp lsp-sonarlint-show-analyzer-logs nil
   "Show analyzer's logs in the SonarLint output."
   :group 'lsp-sonarlint
-  :type 'boolean)
+  :type 'boolean
+  :lsp-path "sonarlint.output.showAnalyzerLogs")
 
-(defcustom lsp-sonarlint-verbose-logs nil
+(defcustom-lsp lsp-sonarlint-verbose-logs nil
   "Enable verbose logging of the SonarLint language server."
   :group 'lsp-sonarlint
-  :type 'boolean)
+  :type 'boolean
+  :lsp-path "sonarlint.output.verboseLogs")
 
-(defcustom lsp-sonarlint-vmargs ""
+(defcustom-lsp lsp-sonarlint-vmargs ""
   "Extra JVM arguments used to launch the SonarLint LSP.
 e.g. `-Xmx1024m`."
   :group 'lsp-sonarlint
-  :type 'string)
+  :type 'string
+  :lsp-path "sonarlint.ls.vmargs")
 
-(defcustom lsp-sonarlint-cfamily-compile-commands-path
-  "${workspaceFolder}/compile_commands.json"
-  "Location of the compile_commands.json file.
-It is needed in C/C++ to provide your compilation options."
+ (defun lsp-sonarlint--find-file-in-parent-folders (fname)
+   "Find the closest FNAME in a buffer folder or one of its parents.
+ Traverse the parent folders from narrow to wide (/a/b/c, /a/b, /a, /).
+ If none of them contains FNAME, return nil."
+   (let ((dir (file-name-directory (expand-file-name (buffer-file-name))))
+         (found-file nil))
+     (while (not (or found-file (string-empty-p dir) (string-equal dir "/")))
+       (let ((potential-file (concat dir fname)))
+         (if (file-exists-p potential-file)
+             (setq found-file potential-file)
+           (setq dir (file-name-directory (directory-file-name dir))))))
+     found-file))
+
+(defcustom-lsp lsp-sonarlint-path-to-compile-commands ""
+  "Path to the compilation DB - the compile_commands.json file."
+  :type 'path
   :group 'lsp-sonarlint
-  :type 'file)
+  :lsp-path "sonarlint.pathToCompileCommands")
+
+ (defun lsp-sonarlint--get-compile-commands ()
+   "Find compile_commands.json in the parent dir or ask user."
+   (or (lsp-sonarlint--find-file-in-parent-folders "compile_commands.json")
+       (read-file-name "Provide path to compile_commands.json for this project: ")))
+
+ (defun lsp-sonarlint--set-compile-commands (_workspace _params)
+   "Find compile_commands.json and set it for the workspace.
+ As a side effect it will also send the found path to the SonarLint server."
+   (let ((fname (lsp-sonarlint--get-compile-commands)))
+     (unless (string-empty-p fname)
+       (message "Using compilation database from %s." fname)
+       (custom-set-variables `(lsp-sonarlint-path-to-compile-commands ,(expand-file-name fname))))))
+
+(defun lsp-sonarlint-set-compile-commands (fname)
+  "Set FNAME as the path to the compile_commands.json file for current session."
+  (interactive "fCompilation DB path: ")
+  (custom-set-variables `(lsp-sonarlint-path-to-compile-commands ,(expand-file-name fname))))
 
 (defconst lsp-sonarlint-go-doc-url "https://www.sonarsource.com/go/"
   "Documentation sonarsource URL.")
@@ -321,14 +356,6 @@ See `lsp-sonarlint-analyze-folder' to see which files are ignored."
 
 (defvar lsp-sonarlint--action-handlers '())
 
-(lsp-register-custom-settings
- '(("sonarlint.disableTelemetry" lsp-sonarlint-disable-telemetry)
-   ("sonarlint.testFilePattern" lsp-sonarlint-test-file-pattern)
-   ("sonarlint.pathToCompileCommands" lsp-sonarlint-cfamily-compile-commands-path)
-   ("sonarlint.output.showAnalyzerLogs" lsp-sonarlint-show-analyzer-logs)
-   ("sonarlint.output.verboseLogs" lsp-sonarlint-verbose-logs)
-   ("sonarlint.ls.vmargs" lsp-sonarlint-vmargs)))
-
 (defvar lsp-sonarlint--request-handlers
   (lsp-ht
    ;; Check whether the file should be analyzed or not
@@ -380,8 +407,7 @@ See REQUEST-HANDLERS in lsp--client in lsp-mode."
    ("sonarlint/readyForTests" #'ignore)
    ;; Sent by cfamily for analysis of C/C++ files. Sonar requires your
    ;; build commands specified in a compile_commands.json
-   ("sonarlint/needCompilationDatabase" (lambda(&rest _)
-                                          (warn "Sonar could not find your compile_commands.json, please check `lsp-sonarlint-cfamily-compile-commands-path'")))
+   ("sonarlint/needCompilationDatabase" #'lsp-sonarlint--set-compile-commands)
    ;; This is probably just to raise awareness of the new kind of issues:
    ;; secrets. That'd be too booring to implement. Hopefully, the user is
    ;; paying attention and will notice anyway.
@@ -398,18 +424,19 @@ See NOTIFICATION-HANDLERS in lsp--client in lsp-mode.")
   :priority -1
   :request-handlers lsp-sonarlint--request-handlers
   :notification-handlers lsp-sonarlint--notification-handlers
-  :multi-root t
+  :multi-root nil
   :add-on? t
   :server-id 'sonarlint
   :action-handlers (ht<-alist lsp-sonarlint--action-handlers)
   :initialization-options (lambda ()
-			    (list
-			     :productKey "emacs"
-			     :productName "Emacs"))
+                            (list
+                             :productKey "emacs"
+                             :productName "Emacs"))
   :initialized-fn (lambda (workspace)
                     (with-lsp-workspace workspace
                       (lsp--set-configuration
-                       (lsp-configuration-section "sonarlint"))))))
+                       (lsp-configuration-section "sonarlint"))))
+  :synchronize-sections '("sonarlint")))
 
 (provide 'lsp-sonarlint)
 ;;; lsp-sonarlint.el ends here

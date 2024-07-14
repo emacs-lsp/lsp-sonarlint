@@ -3,11 +3,11 @@ SHELL := /usr/bin/env bash
 EMACS ?= emacs
 EASK ?= eask
 
-TEST-FILES := $(shell ls test/*.el)
+TEST-FILES := $(shell ls test/*-test.el)
 
-.PHONY: clean checkdoc lint package install compile test
+.PHONY: clean checkdoc lint package install compile download-sonarlint test
 
-ci: clean package install compile test
+ci: clean package install compile download-sonarlint test
 
 package:
 	@echo "Packaging..."
@@ -20,6 +20,10 @@ install:
 compile:
 	@echo "Compiling..."
 	$(EASK) compile
+
+download-sonarlint:
+	@echo "Downloading SonarLint..."
+	$(EASK) eval '(progn (require (quote lsp-sonarlint)) (lsp-sonarlint-download))'
 
 test:
 	@echo "Testing..."
