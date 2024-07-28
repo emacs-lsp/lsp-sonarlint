@@ -192,7 +192,7 @@ If nil, use python-mode by default."
 (ert-deftest lsp-sonarlint--c++-compiler-available ()
   "Check that the C++ compiler used for tests is available."
   (let ((comp-db (lsp-sonarlint--read-file "compile_commands.json")))
-    (should (string-match "command\": \"(.*) sample.cpp" comp-db))
+    (should (string-match "command\": \"\\(.*\\) sample.cpp" comp-db))
     (let ((compiler (match-string 1 comp-db)))
       (should (executable-find compiler)))))
 
