@@ -134,6 +134,31 @@ If nil, use python-mode by default."
      (lsp-sonarlint--get-codes-of-issues diags))
    (if major-mode major-mode 'python-mode)))
 
+(ert-deftest lsp-sonarlint-lsp-mode-detects-abscent-plugin ()
+  "Check that LSP mode detects the absence of the SonarLint plugin."
+  (let ((lsp-sonarlint-download-dir (lsp-sonarlint--sample-file ""))
+        (lsp-sonarlint-use-system-jre t)
+        (filename (lsp-sonarlint--sample-file "sample.py"))
+        (exec-path (cons (lsp-sonarlint--sample-file "mock-java-bin/")
+                         exec-path)))
+    (should (null (lsp-sonarlint--any-alive-workspaces-p)))
+    (let ((lsp-enabled-clients '(sonarlint))
+          (lsp-keep-workspace-alive nil)
+          (dir (file-name-directory filename))
+          (lsp-enable-snippet nil))
+      (let ((buf (find-file-noselect filename)))
+        (unwind-protect
+            (progn
+              (lsp-workspace-folders-add dir)
+              (with-current-buffer buf
+                (python-mode)
+                (should (string-match-p
+                         "do not have automatic installation: sonarlint"
+                         (lsp)))))
+          (kill-buffer buf)
+          (lsp-workspace-folders-remove dir)
+          (lsp-sonarlint--wait-for-workspaces-to-die 10))))))
+
 (ert-deftest lsp-sonarlint-python-reports-issues ()
   "Check that LSP can get Python SonarLint issues for a Python file."
   (should (equal (lsp-sonarlint--get-all-issue-codes "sample.py")

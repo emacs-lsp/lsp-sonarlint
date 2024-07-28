@@ -259,6 +259,9 @@ See `lsp-sonarlint-available-analyzers' and `lsp-sonarlint-enabled-analyzers'"
 
 (defun lsp-sonarlint-server-start-fun()
   "Start lsp-sonarlint in stdio mode."
+  ;; This will signal an error if `lsp-sonarlint-download-dir' is not a dir
+  ;; or if the java executable is not found there.
+  ;; Thus, it also serves as a check for the presence of SonarLint LSP server.
   (let* ((root-dir lsp-sonarlint-download-dir)
          (bundled-java-path (car (directory-files-recursively root-dir "java\\(.exe\\)?$")))
          (java-path (if lsp-sonarlint-use-system-jre "java" bundled-java-path))
