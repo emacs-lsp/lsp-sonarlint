@@ -183,6 +183,19 @@ If nil, use python-mode by default."
   (should (equal (lsp-sonarlint--get-all-issue-codes "sample.go")
                  '("go:S1135"))))
 
+(defun lsp-sonarlint--read-file (fname)
+  "Read the contents of the file FNAME."
+  (with-temp-buffer
+    (insert-file-contents (lsp-sonarlint--sample-file fname))
+    (buffer-string)))
+
+(ert-deftest lsp-sonarlint--c++-compiler-available ()
+  "Check that the C++ compiler used for tests is available."
+  (let ((comp-db (lsp-sonarlint--read-file "compile_commands.json")))
+    (should (string-match "command\": \"(.*) sample.cpp" comp-db))
+    (let ((compiler (match-string 1 comp-db)))
+      (should (executable-find compiler)))))
+
 (ert-deftest lsp-sonarlint-c++-reports-issues ()
   "Check that LSP can get go SonarLint issues for a C++ file."
   (should (equal (lsp-sonarlint--get-all-issue-codes "sample.cpp" 'c++-mode)
