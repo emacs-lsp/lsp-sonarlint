@@ -17,20 +17,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # TODO: fix lsp-sonarlint-c++-reports-issues on macos and include it
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, macos-latest]
         emacs-version:
           - 27.2
           - 28.2
           - 29.4
         experimental: [false]
+        include:
+          - os: ubuntu-latest
+            emacs-version: snapshot
+            experimental: true
+          - os: macos-latest
+            emacs-version: snapshot
+            experimental: true
         # TODO: enable once emacs snapshot version is fixed
         # see https://github.com/emacs-eask/cli/issues/224
-        # include:
-        #   - os: ubuntu-latest
-        #     emacs-version: snapshot
-        #     experimental: true
-        #   - os: macos-latest
+        #   - os: windows-latest
         #     emacs-version: snapshot
         #     experimental: true
         exclude:
