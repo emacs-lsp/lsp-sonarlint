@@ -138,9 +138,7 @@ If nil, use python-mode by default."
   "Check that LSP mode detects the absence of the SonarLint plugin."
   (let ((lsp-sonarlint-download-dir (lsp-sonarlint--sample-file ""))
         (lsp-sonarlint-use-system-jre t)
-        (filename (lsp-sonarlint--sample-file "sample.py"))
-        (exec-path (cons (lsp-sonarlint--sample-file "mock-java-bin/")
-                         exec-path)))
+        (filename (lsp-sonarlint--sample-file "sample.py")))
     (should (null (lsp-sonarlint--any-alive-workspaces-p)))
     (let ((lsp-enabled-clients '(sonarlint))
           (lsp-keep-workspace-alive nil)
