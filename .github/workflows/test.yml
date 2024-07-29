@@ -22,7 +22,7 @@ jobs:
         emacs-version:
           - 27.2
           - 28.2
-          - 29.3
+          - 29.4
         experimental: [false]
         # TODO: enable once emacs snapshot version is fixed
         # see https://github.com/emacs-eask/cli/issues/224
