@@ -23,14 +23,16 @@ jobs:
           - 28.2
           - 29.4
         experimental: [false]
-        include:
-          - os: ubuntu-latest
-            emacs-version: snapshot
-            experimental: true
-          - os: macos-latest
-            emacs-version: snapshot
-            experimental: true
         # TODO: enable once emacs snapshot version is fixed
+        # For some reason takes too long to run, see
+        # github.com/emacs-lsp/lsp-sonarlint/pull/25#issuecomment-2226929636
+        # include:
+        #   - os: ubuntu-latest
+        #     emacs-version: snapshot
+        #     experimental: true
+        #   - os: macos-latest
+        #     emacs-version: snapshot
+        #     experimental: true
         # see https://github.com/emacs-eask/cli/issues/224
         #   - os: windows-latest
         #     emacs-version: snapshot
