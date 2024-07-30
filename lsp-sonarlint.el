@@ -319,7 +319,46 @@ See `lsp-sonarlint-analyze-folder' to see which files are ignored."
                         ("filePath" file)))
                      utf8-filenames))))))
 
-(defvar lsp-sonarlint--action-handlers '())
+(defvar lsp-sonarlint--secondary-locations-overlays nil
+  "List of overlays highlighting secondary locations.")
+
+(defface lsp-sonarlint--step-marker '((t :height .8 :weight bold
+                                       :box (:line-width (2 . -2)
+                                             :color "rose"
+                                             :style released-button)
+                                       :background "dark red"
+                                       :foreground "white"))
+  "Face used for the little markers on the side of each secondary step.")
+
+(defun lsp-sonarlint--show-all-locations (command)
+  "Show all secondary locations listed in COMMAND for the focused issue."
+  (mapc #'delete-overlay lsp-sonarlint--secondary-locations-overlays)
+  (setq lsp-sonarlint--secondary-locations-overlays nil)
+  (let ((flows (ht-get (seq-first (ht-get command "arguments")) "flows")))
+    (seq-map (lambda (flow)
+               (let ((locations (ht-get flow "locations"))
+                     (step-num 0))
+                 (seq-map (lambda (location)
+                            (let* ((range-ht (ht-get location "textRange"))
+                                   (start-line (1- (ht-get range-ht "startLine")))
+                                   (start-col (ht-get range-ht "startLineOffset"))
+                                   (end-line (1- (ht-get range-ht "endLine")))
+                                   (end-col (ht-get range-ht "endLineOffset"))
+                                   (start-pos (lsp--line-character-to-point start-line start-col))
+                                   (end-pos (lsp--line-character-to-point end-line end-col))
+                                   (overlay (make-overlay start-pos end-pos)))
+                              (overlay-put overlay 'face 'lsp-ui-peek-highlight)
+                              (overlay-put overlay 'before-string
+                                           (propertize (format "%d" step-num)
+                                                       'face 'lsp-sonarlint--step-marker))
+                              (setq step-num (1+ step-num))
+                              (push overlay lsp-sonarlint--secondary-locations-overlays)))
+                          locations)))
+             flows)))
+
+(defvar lsp-sonarlint--action-handlers
+  (lsp-ht
+   ("SonarLint.ShowAllLocations" #'lsp-sonarlint--show-all-locations)))
 
 (lsp-register-custom-settings
  '(("sonarlint.disableTelemetry" lsp-sonarlint-disable-telemetry)
@@ -401,7 +440,7 @@ See NOTIFICATION-HANDLERS in lsp--client in lsp-mode.")
   :multi-root t
   :add-on? t
   :server-id 'sonarlint
-  :action-handlers (ht<-alist lsp-sonarlint--action-handlers)
+  :action-handlers lsp-sonarlint--action-handlers
   :initialization-options (lambda ()
 			    (list
 			     :productKey "emacs"
