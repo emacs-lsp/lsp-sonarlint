@@ -418,7 +418,10 @@ Returns a list of plists with the overlay, step number, and message."
      #'append
      (seq-map
       (lambda (flow)
-        (let ((locations (ht-get flow "locations")))
+        ;; By SonarLint convention in which the execution flow leading to a
+        ;; data-flow issue is listed in reverse order. `seq-reverse' lets us
+        ;; display the execution flow in natural order.
+        (let ((locations (seq-reverse (ht-get flow "locations"))))
           (seq-map
            (lambda (location)
              (setq step-num (1+ step-num))
