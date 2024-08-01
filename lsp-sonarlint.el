@@ -330,31 +330,76 @@ See `lsp-sonarlint-analyze-folder' to see which files are ignored."
                                        :foreground "white"))
   "Face used for the little markers on the side of each secondary step.")
 
+(defun lsp-sonarlint--get-range-positions (range)
+  "Convert the RANGE hash table from SonarLint to a plist with positions."
+  (let ((start-line (1- (ht-get range "startLine")))
+        (start-col (ht-get range "startLineOffset"))
+        (end-line (1- (ht-get range "endLine")))
+        (end-col (ht-get range "endLineOffset")))
+    `(:begin ,(lsp--line-character-to-point start-line start-col)
+      :end ,(lsp--line-character-to-point end-line end-col))))
+
+(defun lsp-sonarlint--make-overlay-between (begin-end-positions)
+  "Create an overlay between BEGIN-END-POSITIONS.
+
+BEGIN-END-POSITIONS is a plist with :begin and :end positions."
+  (let ((start-pos (plist-get begin-end-positions :begin))
+        (end-pos (plist-get begin-end-positions :end)))
+    (make-overlay start-pos end-pos (current-buffer))))
+
+(defun lsp-sonarlint--procure-overlays-for-secondary-locations (flows)
+  "Create overlays for secondary locations in FLOWS.
+
+Returns a list of plists with the overlay, step number, and message."
+  (let ((step-num 0))
+    (apply
+     #'append
+     (seq-map
+      (lambda (flow)
+        (let ((locations (ht-get flow "locations")))
+          (seq-map
+           (lambda (location)
+             (setq step-num (1+ step-num))
+             (let* ((range-ht (ht-get location "textRange"))
+                    (range (lsp-sonarlint--get-range-positions range-ht))
+                    (overlay (lsp-sonarlint--make-overlay-between range))
+                    (message (ht-get location "message")))
+               (overlay-put overlay 'face 'lsp-ui-peek-highlight)
+               (overlay-put overlay 'before-string
+                            (propertize (format "%d" step-num)
+                                        'face 'lsp-sonarlint--step-marker))
+               (push overlay lsp-sonarlint--secondary-locations-overlays)
+               `(:overlay ,overlay :step-num ,step-num :message ,message)))
+           locations)))
+      flows))))
+
+(defconst lsp-sonarlint--secondary-messages-buffer-name "*SonarLint secondary locations*"
+  "Name of the buffer where messages for secondary locations are displayed.")
+
 (defun lsp-sonarlint--show-all-locations (command)
   "Show all secondary locations listed in COMMAND for the focused issue."
   (mapc #'delete-overlay lsp-sonarlint--secondary-locations-overlays)
   (setq lsp-sonarlint--secondary-locations-overlays nil)
-  (let ((flows (ht-get (seq-first (ht-get command "arguments")) "flows")))
-    (seq-map (lambda (flow)
-               (let ((locations (ht-get flow "locations"))
-                     (step-num 0))
-                 (seq-map (lambda (location)
-                            (let* ((range-ht (ht-get location "textRange"))
-                                   (start-line (1- (ht-get range-ht "startLine")))
-                                   (start-col (ht-get range-ht "startLineOffset"))
-                                   (end-line (1- (ht-get range-ht "endLine")))
-                                   (end-col (ht-get range-ht "endLineOffset"))
-                                   (start-pos (lsp--line-character-to-point start-line start-col))
-                                   (end-pos (lsp--line-character-to-point end-line end-col))
-                                   (overlay (make-overlay start-pos end-pos)))
-                              (overlay-put overlay 'face 'lsp-ui-peek-highlight)
-                              (overlay-put overlay 'before-string
-                                           (propertize (format "%d" step-num)
-                                                       'face 'lsp-sonarlint--step-marker))
-                              (setq step-num (1+ step-num))
-                              (push overlay lsp-sonarlint--secondary-locations-overlays)))
-                          locations)))
-             flows)))
+  (let* ((arguments (seq-first (ht-get command "arguments")))
+         (flows (ht-get arguments "flows"))
+         (message (ht-get arguments "message")))
+    (let ((locations (lsp-sonarlint--procure-overlays-for-secondary-locations flows)))
+      (switch-to-buffer-other-window lsp-sonarlint--secondary-messages-buffer-name)
+      (fundamental-mode)
+      (setq buffer-read-only nil)
+      (erase-buffer)
+      (hl-line-mode 1)
+      (insert (propertize message 'face 'lsp-face-semhl-keyword))
+      (dolist (location locations)
+        (insert "\n")
+        (insert (format "  %s: %s"
+                        (propertize
+                         (number-to-string (plist-get location :step-num))
+                         'face 'lsp-headerline-breadcrumb-symbols-face)
+                        (plist-get location :message))))
+      (goto-char (point-min))
+      (tabulated-list-mode)
+      (setq-local cursor-type nil))))
 
 (defvar lsp-sonarlint--action-handlers
   (lsp-ht
