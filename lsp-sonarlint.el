@@ -324,11 +324,28 @@ See `lsp-sonarlint-analyze-folder' to see which files are ignored."
 
 (defface lsp-sonarlint--step-marker '((t :height .8 :weight bold
                                        :box (:line-width (2 . -2)
-                                             :color "rose"
+                                             :color "pink"
                                              :style released-button)
                                        :background "dark red"
                                        :foreground "white"))
   "Face used for the little markers on the side of each secondary step.")
+
+(defface lsp-sonarlint-secondary-location-face
+  '((t :inherit 'lsp-ui-peek-highlight))
+  "Face used for the secondary locations of a SonarLint issue.")
+
+(defface lsp-sonarlint-highlighted-secondary-face
+  '((t :inherit 'mode-line-highlight))
+  "Face used for the highlighted secondary location of a SonarLint issue.")
+
+(defface lsp-sonarlint-primary-message-face
+  '((t :inherit 'lsp-face-semhl-keyword))
+  "Face used for the primary message in the list of secondary messages.")
+
+(defface lsp-sonarlint-seconary-number-face
+  '((t :inherit 'lsp-headerline-breadcrumb-symbols-face))
+  "Face used for the secondary number in the list of secondary messages.")
+
 
 (defun lsp-sonarlint--get-range-positions (range)
   "Convert the RANGE hash table from SonarLint to a plist with positions."
@@ -366,7 +383,7 @@ Returns a list of plists with the overlay, step number, and message."
                     (range (lsp-sonarlint--get-range-positions range-ht))
                     (overlay (lsp-sonarlint--make-overlay-between range))
                     (message (ht-get location "message")))
-               (overlay-put overlay 'face 'lsp-ui-peek-highlight)
+               (overlay-put overlay 'face 'lsp-sonarlint-secondary-location-face)
                (overlay-put overlay 'before-string
                             (propertize (format "%d" step-num)
                                         'face 'lsp-sonarlint--step-marker))
@@ -400,7 +417,7 @@ Returns a list of plists with the overlay, step number, and message."
 (defun lsp-sonarlint--unfocus-overlays ()
   "Unfocus the previously focused overlays."
   (dolist (ov lsp-sonarlint--previously-focused-overlays)
-    (overlay-put ov 'face 'lsp-ui-peek-highlight))
+    (overlay-put ov 'face 'lsp-sonarlint-secondary-location-face))
   (setq lsp-sonarlint--previously-focused-overlays nil))
 
 (defun lsp-sonarlint--focus-on-target (overlay)
@@ -411,7 +428,7 @@ Returns a list of plists with the overlay, step number, and message."
     (goto-char (overlay-start overlay))
     (switch-to-buffer-other-window prev-buffer)
     (lsp-sonarlint--unfocus-overlays)
-    (overlay-put overlay 'face 'mode-line-highlight)
+    (overlay-put overlay 'face 'lsp-sonarlint-highlighted-secondary-face)
     (push overlay lsp-sonarlint--previously-focused-overlays)))
 
 (defun lsp-sonarlint--on-line-move (&rest _args)
@@ -440,7 +457,7 @@ Returns a list of plists with the overlay, step number, and message."
       (setq buffer-read-only nil)
       (erase-buffer)
       (hl-line-mode 1)
-      (insert (propertize message 'face 'lsp-face-semhl-keyword))
+      (insert (propertize message 'face 'lsp-sonarlint-primary-message-face))
 
       (advice-add 'line-move :after #'lsp-sonarlint--on-line-move)
       (advice-add 'mouse-set-point :after #'lsp-sonarlint--on-line-move)
@@ -451,7 +468,7 @@ Returns a list of plists with the overlay, step number, and message."
         (insert (format "  %s: %s"
                         (propertize
                          (number-to-string (plist-get location :step-num))
-                         'face 'lsp-headerline-breadcrumb-symbols-face)
+                         'face 'lsp-sonarlint-seconary-number-face)
                         (plist-get location :message)))
         (let ((overlay (lsp-sonarlint--make-overlay-between
                         `(:begin ,(line-beginning-position)
