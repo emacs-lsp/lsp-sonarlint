@@ -354,6 +354,10 @@ See `lsp-sonarlint-analyze-folder' to see which files are ignored."
   '((t :inherit 'lsp-face-semhl-keyword))
   "Face used for the primary message in the list of secondary messages.")
 
+(defface lsp-sonarlint-embedded-msg-face
+  '((t :italic t :height 0.8))
+  "Face used for the in-line secondary messages.")
+
 (defun lsp-sonarlint--get-range-positions (range)
   "Convert the RANGE hash table from SonarLint to a plist with positions."
   (let ((start-line (1- (ht-get range "startLine")))
@@ -379,6 +383,32 @@ BEGIN-END-POSITIONS is a plist with :begin and :end positions."
                (propertize (number-to-string num)
                            'face 'lsp-sonarlint--step-marker)))
 
+(defun lsp-sonarlint--make-full-line-overlay (range)
+  "Create an overlay covering entire line(s) rather than the precise RANGE."
+  (save-excursion
+    (goto-char (plist-get range :begin))
+    (let ((begin (line-beginning-position)))
+      (goto-char (plist-get range :end))
+      (let ((end (line-end-position)))
+        (lsp-sonarlint--make-overlay-between `(:begin ,begin :end ,end))))))
+
+(defun lsp-sonarlint--get-column (pos)
+  "Get the column of the point position POS."
+  (save-excursion
+    (goto-char pos)
+    (current-column)))
+
+(defun lsp-sonarlint--secondary-msg-lens-offset (range)
+  "Compute and return white-space string to align message with RANGE."
+  (let* ((msg-height (face-attribute 'lsp-sonarlint-embedded-msg-face :height nil 'default))
+         (default-height (face-attribute 'default :height))
+         (msg-offset-in-chars
+          (1+ (/ (* (lsp-sonarlint--get-column
+                     (plist-get range :begin))
+                    default-height)
+                 msg-height))))
+    (make-string msg-offset-in-chars ?\s)))
+
 (defun lsp-sonarlint--procure-overlays-for-secondary-locations (flows)
   "Create overlays for secondary locations in FLOWS.
 
@@ -395,8 +425,13 @@ Returns a list of plists with the overlay, step number, and message."
              (let* ((range-ht (ht-get location "textRange"))
                     (range (lsp-sonarlint--get-range-positions range-ht))
                     (overlay (lsp-sonarlint--make-overlay-between range))
+                    (fl-ovl (lsp-sonarlint--make-full-line-overlay range))
+                    (message-offset (lsp-sonarlint--secondary-msg-lens-offset range))
                     (message (ht-get location "message")))
                (overlay-put overlay 'face 'lsp-sonarlint-secondary-location-face)
+               (overlay-put fl-ovl 'before-string
+                            (propertize (concat message-offset message "\n")
+                                        'face 'lsp-sonarlint-embedded-msg-face))
                (lsp-sonarlint--add-number-marker overlay step-num)
                `(:overlay ,overlay :step-num ,step-num :message ,message)))
            locations)))
