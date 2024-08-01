@@ -37,6 +37,7 @@
 (require 'cus-edit)
 (require 'ht)
 (require 'shr)
+(require 'hl-line)
 
 (defgroup lsp-sonarlint nil
   "SonarLint lsp server group"
@@ -468,16 +469,25 @@ Returns a list of plists with the overlay, step number, and message."
     (overlay-put ov 'face 'lsp-sonarlint-secondary-location-face))
   (setq lsp-sonarlint--previously-focused-overlays nil))
 
+(defun lsp-sonarlint--highlight-target (overlay)
+  "Highlight OVERLAY."
+  (lsp-sonarlint--unfocus-overlays)
+  (overlay-put overlay 'face 'lsp-sonarlint-highlighted-secondary-face)
+  (push overlay lsp-sonarlint--previously-focused-overlays))
+
 (defun lsp-sonarlint--focus-on-target (overlay)
-  "Highlight the OVERLAY in the target buffer."
+  "Put point to OVERLAY and make it visible in another window."
   (when-let ((target-buffer (overlay-buffer overlay))
              (prev-buffer (current-buffer)))
     (switch-to-buffer-other-window target-buffer)
     (goto-char (overlay-start overlay))
-    (switch-to-buffer-other-window prev-buffer)
-    (lsp-sonarlint--unfocus-overlays)
-    (overlay-put overlay 'face 'lsp-sonarlint-highlighted-secondary-face)
-    (push overlay lsp-sonarlint--previously-focused-overlays)))
+    (hl-line-highlight) ; make sure the line highlighting is updated
+    (switch-to-buffer-other-window prev-buffer)))
+
+(defvar lsp-sonarlint--original-buffer nil
+  "The buffer with code and SonarLint issues.
+
+Useful when exploring secondary locations, which uses an auxiliary buffer.")
 
 (defun lsp-sonarlint--on-line-move (&rest _args)
   "Highlight the current line in the secondary locations buffer."
@@ -487,7 +497,13 @@ Returns a list of plists with the overlay, step number, and message."
                        (setq focus-overlay (overlay-get ovl 'focus-location))))
             (overlays-at (point)))
       (when focus-overlay
-        (lsp-sonarlint--focus-on-target focus-overlay)))))
+        (lsp-sonarlint--focus-on-target focus-overlay)
+        (lsp-sonarlint--highlight-target focus-overlay))))
+  (when (eq (current-buffer) lsp-sonarlint--original-buffer)
+    (when-let ((focus-overlay (seq-find (lambda (ovl) (overlay-get ovl 'lsp-sonarlint--message-overlay))
+                                        (overlays-at (point)))))
+      (lsp-sonarlint--focus-on-target (overlay-get focus-overlay 'lsp-sonarlint--message-overlay))
+      (hl-line-highlight))))
 
 
 (defun lsp-sonarlint--on-kill-buffer (&rest _args)
@@ -503,8 +519,10 @@ pointing to the `:overlay' from LOC-MESSAGE."
   (insert (plist-get loc-message :message))
   (let ((overlay (lsp-sonarlint--make-overlay-between
                   `(:begin ,(line-beginning-position)
-                    :end ,(line-end-position)))))
-    (overlay-put overlay 'focus-location (plist-get loc-message :overlay))
+                    :end ,(line-end-position))))
+        (focus-overlay (plist-get loc-message :overlay)))
+    (overlay-put overlay 'focus-location focus-overlay)
+    (overlay-put focus-overlay 'lsp-sonarlint--message-overlay overlay)
     overlay))
 
 (defun lsp-sonarlint--extract-located-messages (locations)
@@ -600,11 +618,6 @@ adjust offsets to account for the number labels prepended to each location."
                                                   (lsp-sonarlint--concat-msg-lines postfix-msgs))
                                           'face 'lsp-sonarlint-embedded-msg-face)))))
            (lsp-sonarlint--extract-located-messages locations)))
-
-(defvar lsp-sonarlint--original-buffer nil
-  "The buffer with code and SonarLint issues.
-
-Useful when exploring secondary locations, which uses an auxiliary buffer.")
 
 (defun lsp-sonarlint--show-all-locations (command)
   "Show all secondary locations listed in COMMAND for the focused issue."
