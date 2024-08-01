@@ -457,8 +457,8 @@ Returns a list of plists with the overlay, step number, and message."
       (mapc (lambda (ovl) (when (overlay-get ovl 'focus-location)
                        (setq focus-overlay (overlay-get ovl 'focus-location))))
             (overlays-at (point)))
-      ;; TODO: when focus-overlay
-      (lsp-sonarlint--focus-on-target focus-overlay))))
+      (when focus-overlay
+        (lsp-sonarlint--focus-on-target focus-overlay)))))
 
 
 (defun lsp-sonarlint--on-kill-buffer (&rest _args)
