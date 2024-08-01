@@ -376,10 +376,19 @@ Returns a list of plists with the overlay, step number, and message."
 (defconst lsp-sonarlint--secondary-messages-buffer-name "*SonarLint secondary locations*"
   "Name of the buffer where messages for secondary locations are displayed.")
 
+(defun lsp-sonarlint--remove-secondary-loc-highlights ()
+  "Remove all overlays highlighting secondary locations."
+  (mapc #'delete-overlay lsp-sonarlint--secondary-locations-overlays)
+  (setq lsp-sonarlint--secondary-locations-overlays nil))
+
+(defun lsp-sonarlint--on-quit-window ()
+  "Remove locations' overlays when the secondary-messages window is closed."
+  (when (string-equal (buffer-name) lsp-sonarlint--secondary-messages-buffer-name)
+    (lsp-sonarlint--remove-secondary-loc-highlights)))
+
 (defun lsp-sonarlint--show-all-locations (command)
   "Show all secondary locations listed in COMMAND for the focused issue."
-  (mapc #'delete-overlay lsp-sonarlint--secondary-locations-overlays)
-  (setq lsp-sonarlint--secondary-locations-overlays nil)
+  (lsp-sonarlint--remove-secondary-loc-highlights)
   (let* ((arguments (seq-first (ht-get command "arguments")))
          (flows (ht-get arguments "flows"))
          (message (ht-get arguments "message")))
@@ -487,9 +496,11 @@ See NOTIFICATION-HANDLERS in lsp--client in lsp-mode.")
   :server-id 'sonarlint
   :action-handlers lsp-sonarlint--action-handlers
   :initialization-options (lambda ()
-			    (list
-			     :productKey "emacs"
-			     :productName "Emacs"))
+                            (list
+                             :productKey "emacs"
+                             :productName "Emacs"))
+  :after-open-fn (lambda ()
+                   (add-hook 'quit-window-hook #'lsp-sonarlint--on-quit-window))
   :initialized-fn (lambda (workspace)
                     (with-lsp-workspace workspace
                       (lsp--set-configuration
