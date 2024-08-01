@@ -343,9 +343,11 @@ See `lsp-sonarlint-analyze-folder' to see which files are ignored."
   "Create an overlay between BEGIN-END-POSITIONS.
 
 BEGIN-END-POSITIONS is a plist with :begin and :end positions."
-  (let ((start-pos (plist-get begin-end-positions :begin))
-        (end-pos (plist-get begin-end-positions :end)))
-    (make-overlay start-pos end-pos (current-buffer))))
+  (let* ((start-pos (plist-get begin-end-positions :begin))
+         (end-pos (plist-get begin-end-positions :end))
+         (overlay (make-overlay start-pos end-pos (current-buffer))))
+    (push overlay lsp-sonarlint--secondary-locations-overlays)
+    overlay))
 
 (defun lsp-sonarlint--procure-overlays-for-secondary-locations (flows)
   "Create overlays for secondary locations in FLOWS.
@@ -368,7 +370,6 @@ Returns a list of plists with the overlay, step number, and message."
                (overlay-put overlay 'before-string
                             (propertize (format "%d" step-num)
                                         'face 'lsp-sonarlint--step-marker))
-               (push overlay lsp-sonarlint--secondary-locations-overlays)
                `(:overlay ,overlay :step-num ,step-num :message ,message)))
            locations)))
       flows))))
@@ -384,7 +385,48 @@ Returns a list of plists with the overlay, step number, and message."
 (defun lsp-sonarlint--on-quit-window ()
   "Remove locations' overlays when the secondary-messages window is closed."
   (when (string-equal (buffer-name) lsp-sonarlint--secondary-messages-buffer-name)
+    (lsp-sonarlint--remove-advices)
     (lsp-sonarlint--remove-secondary-loc-highlights)))
+
+(defun lsp-sonarlint--remove-advices ()
+  "Remove advices added to `line-move' and `mouse-set-point'."
+    (advice-remove 'line-move #'lsp-sonarlint--on-line-move)
+    (advice-remove 'mouse-set-point #'lsp-sonarlint--on-line-move)
+    (advice-remove 'kill-buffer #'lsp-sonarlint--on-kill-buffer))
+
+(defvar lsp-sonarlint--previously-focused-overlays nil
+  "The list of overlays that was previously focused.")
+
+(defun lsp-sonarlint--unfocus-overlays ()
+  "Unfocus the previously focused overlays."
+  (dolist (ov lsp-sonarlint--previously-focused-overlays)
+    (overlay-put ov 'face 'lsp-ui-peek-highlight))
+  (setq lsp-sonarlint--previously-focused-overlays nil))
+
+(defun lsp-sonarlint--focus-on-target (overlay)
+  "Highlight the OVERLAY in the target buffer."
+  (when-let ((target-buffer (overlay-buffer overlay))
+             (prev-buffer (current-buffer)))
+    (switch-to-buffer-other-window target-buffer)
+    (goto-char (overlay-start overlay))
+    (switch-to-buffer-other-window prev-buffer)
+    (lsp-sonarlint--unfocus-overlays)
+    (overlay-put overlay 'face 'mode-line-highlight)
+    (push overlay lsp-sonarlint--previously-focused-overlays)))
+
+(defun lsp-sonarlint--on-line-move (&rest _args)
+  "Highlight the current line in the secondary locations buffer."
+  (when (string-equal (buffer-name) lsp-sonarlint--secondary-messages-buffer-name)
+    (let ((focus-overlay nil))
+      (mapc (lambda (ovl) (when (overlay-get ovl 'focus-location)
+                       (setq focus-overlay (overlay-get ovl 'focus-location))))
+            (overlays-at (point)))
+      (lsp-sonarlint--focus-on-target focus-overlay))))
+
+
+(defun lsp-sonarlint--on-kill-buffer (&rest _args)
+  "Remove sec-locations' highlights and advices when the buffer is killed."
+  (lsp-sonarlint--on-quit-window))
 
 (defun lsp-sonarlint--show-all-locations (command)
   "Show all secondary locations listed in COMMAND for the focused issue."
@@ -399,13 +441,22 @@ Returns a list of plists with the overlay, step number, and message."
       (erase-buffer)
       (hl-line-mode 1)
       (insert (propertize message 'face 'lsp-face-semhl-keyword))
+
+      (advice-add 'line-move :after #'lsp-sonarlint--on-line-move)
+      (advice-add 'mouse-set-point :after #'lsp-sonarlint--on-line-move)
+      (advice-add 'kill-buffer :after #'lsp-sonarlint--on-kill-buffer)
+
       (dolist (location locations)
         (insert "\n")
         (insert (format "  %s: %s"
                         (propertize
                          (number-to-string (plist-get location :step-num))
                          'face 'lsp-headerline-breadcrumb-symbols-face)
-                        (plist-get location :message))))
+                        (plist-get location :message)))
+        (let ((overlay (lsp-sonarlint--make-overlay-between
+                        `(:begin ,(line-beginning-position)
+                          :end ,(line-end-position)))))
+          (overlay-put overlay 'focus-location (plist-get location :overlay))))
       (goto-char (point-min))
       (tabulated-list-mode)
       (setq-local cursor-type nil))))
