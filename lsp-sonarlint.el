@@ -398,14 +398,6 @@ BEGIN-END-POSITIONS is a plist with :begin and :end positions."
     (goto-char pos)
     (current-column)))
 
-(defun lsp-sonarlint--secondary-msg-lens-offset (position)
-  "Compute and return number of characters to align message with POSITION."
-  (let* ((msg-height (face-attribute 'lsp-sonarlint-embedded-msg-face :height nil 'default))
-         (default-height (face-attribute 'default :height)))
-    (1+ (/ (* (lsp-sonarlint--get-column position)
-              default-height)
-           msg-height))))
-
 (defun lsp-sonarlint--procure-overlays-for-secondary-locations (flows)
   "Create overlays for secondary locations in FLOWS.
 
@@ -532,21 +524,19 @@ pointing to the `:overlay' from LOC-MESSAGE."
   (let ((line-to-msg (make-hash-table :test #'equal)))
     (mapc (lambda (location)
             (let* ((precise-overlay (plist-get location :overlay))
-                   (message-offset (lsp-sonarlint--secondary-msg-lens-offset
-                                    (overlay-start precise-overlay)))
-                   (message (plist-get location :message))
+                   (message-offset (lsp-sonarlint--get-column (overlay-start precise-overlay)))
                    (line (line-number-at-pos (overlay-start precise-overlay))))
-              (push `(:message ,message :offset ,message-offset)
+              (push `(:offset ,message-offset ,@location)
                     (gethash line line-to-msg))))
           locations)
     line-to-msg))
 
-(defun lsp-sonarlint--deduplicate (sorted-list)
-  "Remove duplicate elements from sorted SORTED-LIST."
+(defun lsp-sonarlint--deduplicate (sorted-list test)
+  "Remove duplicate elements (according to TEST) from sorted SORTED-LIST."
   (let ((result '())
         (last-element nil))
     (dolist (element sorted-list (nreverse result))
-      (unless (equal element last-element)
+      (unless (funcall test element last-element)
         (push element result)
         (setq last-element element)))))
 
@@ -572,24 +562,63 @@ MESSAGES-WITH-OFFSETS must be sorted by offset."
             (pop reversed)
             (push msg-off result)))))))
 
+(defun lsp-sonarlint--count-digits (num)
+  "Count digits in decimal representation of the NUM integer."
+  (length (number-to-string num)))
+
+(defun lsp-sonarlint--adjust-offsets (messages-with-offsets)
+  "Shift offsets in MESSAGES-WITH-OFFSETS to account for number labels.
+
+MESSAGES-WITH-OFFSETS must be sorted."
+  (let ((accumulated-adjustment 0))
+    (mapcar (lambda (msg-with-offset)
+              (let ((increment
+                     (if-let ((step-num (plist-get
+                                         msg-with-offset
+                                         :step-num)))
+                         (lsp-sonarlint--count-digits step-num)
+                       0)))
+                (setq accumulated-adjustment (+ accumulated-adjustment increment))
+                (setf (plist-get msg-with-offset :offset)
+                      (+ accumulated-adjustment
+                         (plist-get msg-with-offset :offset)))
+                msg-with-offset))
+            messages-with-offsets)))
+
+
+(defun lsp-sonarlint--scale-msg-lens-offset (msg-with-offset)
+  "Adjust offset in MSG-WITH-OFFSET preserving column with smaller font."
+  (let* ((original-offset (plist-get msg-with-offset :offset))
+         (msg-height (face-attribute 'lsp-sonarlint-embedded-msg-face :height nil 'default))
+         (default-height (face-attribute 'default :height)))
+    (setf (plist-get msg-with-offset :offset)
+          (/ (* original-offset
+               default-height)
+             msg-height))
+    msg-with-offset))
+
 (defun lsp-sonarlint--process-offsets (messages-with-offsets)
   "Sort, deduplicate, adjust, and combine MESSAGES-WITH-OFFSETS.
 
 Sort them in increasing order, remove duplicate messages with identical offsets,
-adjust offsets to account for the number labels prepended to each location."
+adjust offsets to account for the number labels prepended to each location,
+and combine non-overlapping messages toreduce the number of lines."
   (let* ((sorted (sort messages-with-offsets (lambda (msg-off1 msg-off2)
                                                (< (plist-get msg-off1 :offset)
                                                   (plist-get msg-off2 :offset)))))
-         (deduplicated (lsp-sonarlint--deduplicate sorted))
-         (accumulated-adjustment 0)
-         (adjusted (mapcar (lambda (msg-with-offset)
-                             (setf (plist-get msg-with-offset :offset)
-                                   (+ accumulated-adjustment
-                                      (plist-get msg-with-offset :offset)))
-                             (setq accumulated-adjustment 1)
-                             msg-with-offset)
-                           deduplicated)))
-    (lsp-sonarlint--combine adjusted)))
+         (deduplicated (lsp-sonarlint--deduplicate
+                        sorted
+                        (lambda (msg-off1 msg-off2) (and (equal (plist-get msg-off1 :offset)
+                                                           (plist-get msg-off2 :offset))
+                                                    (equal (plist-get msg-off1 :message)
+                                                           (plist-get msg-off2 :message))))))
+         (adjusted (lsp-sonarlint--adjust-offsets deduplicated))
+         ;; Should scale after adjusting, because adjustment is done
+         ;; in terms of the default font
+         (scaled (mapcar #'lsp-sonarlint--scale-msg-lens-offset adjusted)))
+    ;; Should combine after scaling to also scale the potential gaps between
+    ;; combined messages properly
+    (lsp-sonarlint--combine scaled)))
 
 (defun lsp-sonarlint--concat-msg-lines (msg-offsets)
   "Combine the list of MSG-OFFSETS into a single string."
