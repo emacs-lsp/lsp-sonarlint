@@ -168,7 +168,7 @@ SonarLint LSP server."
                     (+ to (line-beginning-position))
                     (current-buffer)))))
 
-(ert-deftest lsp-sonarlint-test--overlay-strings ()
+(ert-deftest lsp-sonarlint-overlay-strings ()
   "Test `lsp-sonarlint-test--buf-string-with-overlay-strings' on corner cases"
   (with-temp-buffer
     (unwind-protect
@@ -210,7 +210,7 @@ next str
           )
       (remove-overlays))))
 
-(ert-deftest lsp-sonarlint-test--display-secondary-messages ()
+(ert-deftest lsp-sonarlint-display-secondary-messages ()
   "Test that secondary locations are displayed correctly."
   (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path))
         (lsp-sonarlint--scale-inline-msg-offset nil))
@@ -265,7 +265,7 @@ int divide_seventeen(int param) {
       (forward-char -1) ; Make sure to stay within found string to hit the overlay
       (next-line)))
 
-(ert-deftest lsp-sonarlint-test--navigate-to-sec-location ()
+(ert-deftest lsp-sonarlint-navigate-to-sec-location ()
   "Test that point moves to locations of selected messages."
   (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path))
         (lsp-sonarlint--scale-inline-msg-offset nil))
@@ -301,7 +301,7 @@ int divide_seventeen(int param) {
                                                      (line-end-position))
                      "    int b = 0;")))))
 
-(ert-deftest lsp-sonarlint-test--display-execution-flow ()
+(ert-deftest lsp-sonarlint-display-execution-flow ()
   "Test that flow steps are displayed correctly and in order."
   (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path))
         (lsp-sonarlint--scale-inline-msg-offset nil))
@@ -369,7 +369,7 @@ int divide_seventeen(int param) {
 }
 ")))))
 
-(ert-deftest lsp-sonarlint-test--add-inline-messages-deduplicate ()
+(ert-deftest lsp-sonarlint-add-inline-messages-deduplicate ()
   "`lsp-sonarlint--add-inline-messages' deduplicates messages."
   (with-temp-buffer
     (insert "
@@ -396,7 +396,7 @@ Some long line with words clearly separated
 ")))
           (remove-overlays)))))
 
-(ert-deftest lsp-sonarlint-test--add-inline-messages-both-sides ()
+(ert-deftest lsp-sonarlint-add-inline-messages-both-sides ()
   "`lsp-sonarlint--add-inline-messages' places messages on both sides of a line."
   (with-temp-buffer
     (insert "
@@ -424,7 +424,7 @@ first
 ")))
           (remove-overlays)))))
 
-(ert-deftest lsp-sonarlint-test--add-inline-messages-combine ()
+(ert-deftest lsp-sonarlint-add-inline-messages-combine ()
   "`lsp-sonarlint--add-inline-messages' combines messages pairwise."
   (with-temp-buffer
     (insert "
