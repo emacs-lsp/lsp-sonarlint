@@ -24,6 +24,7 @@
 
 (require 'lsp-mode)
 (require 'lsp-sonarlint)
+(require 'cl-lib)
 (load-file (expand-file-name "lsp-sonarlint-test-utils.el"
                              (file-name-directory (or load-file-name (buffer-file-name)))))
 
@@ -118,6 +119,42 @@ SonarLint LSP server."
                      (lsp-sonarlint-test--line-range->ht (plist-get primary :range)))
                     ("codeMatches" nil))))))
 
+(defun lsp-sonarlint-test--overlay-strings (prop-name loc-fun)
+  "Return a list of plists with PROP-NAME and their locs obtained with LOC-FUN."
+  (cl-remove nil (mapcar (lambda (ovl) (if-let ((str-before (overlay-get ovl prop-name)))
+                                      `(,prop-name ,(substring-no-properties str-before)
+                                        :pos ,(funcall loc-fun ovl))
+                                    nil))
+                         (overlays-in (point-min) (point-max)))))
+
+(defun lsp-sonarlint-test--buf-string-with-overlay-strings ()
+  "Contents of current buffer interspersed with overlay-attached strings."
+  (let* ((pieces '())
+         (last-pos (point-min))
+         (before-strings (lsp-sonarlint-test--overlay-strings
+                          'before-string #'overlay-start))
+         (after-strings (lsp-sonarlint-test--overlay-strings
+                         'after-string #'overlay-end))
+         (all-strings (sort (append before-strings after-strings)
+                            (lambda (str1 str2)
+                              (let ((pos1 (plist-get str1 :pos))
+                                    (pos2 (plist-get str2 :pos)))
+                                (or (< pos1 pos2)
+                                    ;; before-string is inserted before after-string
+                                    (and (= pos1 pos2)
+                                         (plist-member str1 'before-string)
+                                         (not (plist-member str2 'before-string)))))))))
+    (dolist (str all-strings)
+      (let ((pos (plist-get str :pos)))
+        (push (buffer-substring-no-properties last-pos pos) pieces)
+        (when-let ((after-string (plist-get str 'after-string)))
+          (push after-string pieces))
+        (when-let ((before-string (plist-get str 'before-string)))
+          (push before-string pieces))
+        (setq last-pos pos)))
+    (concat (string-join (nreverse pieces))
+            (buffer-substring-no-properties last-pos (point-max)))))
+
 (ert-deftest lsp-sonarlint-test--display-secondary-messages ()
   "Test that secondary locations are displayed correctly."
   (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path)))
@@ -139,12 +176,27 @@ SonarLint LSP server."
              (sec-flow2 `((:message "Identical code" :range ,secondary-range2)))
              (command (lsp-sonarlint-test--secloc-command
                        primary-loc (list sec-flow1 sec-flow2))))
-        (lsp-sonarlint--show-all-locations command)
-        (with-current-buffer lsp-sonarlint--secondary-messages-buffer-name
-          (should (equal (buffer-string)
-                         "Redundant branching
-Identical code
-Identical code")))))))
+        (lsp-sonarlint--show-all-locations command)))
+    (with-current-buffer lsp-sonarlint--secondary-messages-buffer-name
+      (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
+                     "Redundant branching
+1Identical code
+2Identical code")))
+    (with-current-buffer target-file-buf
+      (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
+                     "
+int divide_seventeen(int param) {
+  Redundant branching
+  if (param == 0) {
+      Identical code
+    1int a = 0;
+  } else {
+      Identical code
+    2int b = 0;
+  }
+  return 10 / param;
+}
+")))))
 
 
 ;;; lsp-sonarlint-secondar-locations-test.el ends here
