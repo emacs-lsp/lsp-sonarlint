@@ -198,5 +198,73 @@ int divide_seventeen(int param) {
 }
 ")))))
 
+(ert-deftest lsp-sonarlint-test--display-execution-flow ()
+  "Test that flow steps are displayed correctly and in order."
+  (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path)))
+    (with-current-buffer target-file-buf
+      (let* ((primary-range (lsp-sonarlint-test-range-make
+                             (buffer-string)
+                             "  return 10 / param;"
+                             "            ^       "))
+             (primary-loc `(:message "Division by 0" :range ,primary-range))
+             (flow
+              ;; SonarLint sends flow in reverse order
+              (list
+               ;; SonarLint often duplicates primary message in a flow step
+               primary-loc
+               `(:message "Assigning a 0"
+                 :range
+                 ,(lsp-sonarlint-test-range-make (buffer-string)
+                                                 "    int a = 0;"
+                                                 "        ^^^^^ "))
+               `(:message "Taking true branch"
+                 :range
+                 ,(lsp-sonarlint-test-range-make (buffer-string)
+                                                 "  if (param == 0) {"
+                                                 "  ^^               "))
+               `(:message "Assuming param is 0"
+                 :range
+                 ,(lsp-sonarlint-test-range-make (buffer-string)
+                                                 "  if (param == 0) {"
+                                                 "            ^^^^   "))
+               `(:message "Evaluating condition"
+                 :range
+                 ,(lsp-sonarlint-test-range-make (buffer-string)
+                                                 "  if (param == 0) {"
+                                                 "      ^^^^^^^^^^   "))))
+             (command (lsp-sonarlint-test--secloc-command
+                       primary-loc (list flow))))
+        (message "cmd : %s" command)
+        (lsp-sonarlint--show-all-locations command)))
+    (with-current-buffer lsp-sonarlint--secondary-messages-buffer-name
+      (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
+                     "Division by 0
+1Evaluating condition
+2Assuming param is 0
+3Taking true branch
+4Assigning a 0
+5Division by 0")))
+    (with-current-buffer target-file-buf
+      ;; In-line messages appear shifted here because they are rendered
+      ;; with the same font.
+      ;; In the actual buffer these strings have smaller font, so
+      ;; they start closer to the left.
+      (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
+                     "
+int divide_seventeen(int param) {
+   Taking true branch
+          Evaluating condition
+  3if (1param 2== 0) {
+                  Assuming param is 0
+           Assigning a 0
+    int 4a = 0;
+  } else {
+    int b = 0;
+  }
+                Division by 0
+  return 10 5/ param;
+}
+")))))
+
 
 ;;; lsp-sonarlint-secondar-locations-test.el ends here
