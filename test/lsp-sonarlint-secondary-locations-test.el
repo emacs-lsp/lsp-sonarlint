@@ -262,6 +262,7 @@ int divide_seventeen(int param) {
       ;; Deliberately using interactive functions here to trigger line-move
       ;; hooks
       (previous-line)
+      (forward-char -1) ; Make sure to stay within found string to hit the overlay
       (next-line)))
 
 (ert-deftest lsp-sonarlint-test--navigate-to-sec-location ()
