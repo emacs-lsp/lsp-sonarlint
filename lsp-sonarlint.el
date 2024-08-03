@@ -585,17 +585,39 @@ MESSAGES-WITH-OFFSETS must be sorted."
                 msg-with-offset))
             messages-with-offsets)))
 
+(defcustom lsp-sonarlint--scale-inline-msg-offset t
+  "Whether to scale the offset for inline messages (code-lens style).
+
+Usually these messages (including their whitespace offset) are
+printed with smaller font, so they need adjustment to account for
+smaller size of the space character.
+
+- Set to nil if it causes problems.
+- Set to a floating-point number if you want to adjust this factor.
+- If t it will deduce the scaling factor
+  from the `lsp-sonarlint-embedded-msg-face' height."
+  :type '(choice
+          (const :tag "Disable" nil)
+          (integer :tag "Factor")
+          (const :tag "Auto" t)))
+
+(defun lsp-sonarlint--scale-offset (offset)
+  "Adjust OFFSET preserving column position with smaller font."
+  (if lsp-sonarlint--scale-inline-msg-offset
+      (if (numberp lsp-sonarlint--scale-inline-msg-offset)
+          (floor (* lsp-sonarlint--scale-inline-msg-offset offset))
+        (let ((msg-height (face-attribute 'lsp-sonarlint-embedded-msg-face :height nil 'default))
+              (default-height (face-attribute 'default :height)))
+          (/ (* offset
+                default-height)
+             msg-height)))
+    offset))
 
 (defun lsp-sonarlint--scale-msg-lens-offset (msg-with-offset)
   "Adjust offset in MSG-WITH-OFFSET preserving column with smaller font."
-  (let* ((original-offset (plist-get msg-with-offset :offset))
-         (msg-height (face-attribute 'lsp-sonarlint-embedded-msg-face :height nil 'default))
-         (default-height (face-attribute 'default :height)))
-    (setf (plist-get msg-with-offset :offset)
-          (/ (* original-offset
-               default-height)
-             msg-height))
-    msg-with-offset))
+  (setf (plist-get msg-with-offset :offset)
+        (lsp-sonarlint--scale-offset (plist-get msg-with-offset :offset)))
+  msg-with-offset)
 
 (defun lsp-sonarlint--process-offsets (messages-with-offsets)
   "Sort, deduplicate, adjust, and combine MESSAGES-WITH-OFFSETS.

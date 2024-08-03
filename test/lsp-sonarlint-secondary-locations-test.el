@@ -168,7 +168,7 @@ SonarLint LSP server."
                     (+ to (line-beginning-position))
                     (current-buffer)))))
 
-(ert-deftest lsp-sonarlint-test--overlays-string ()
+(ert-deftest lsp-sonarlint-test--overlay-strings ()
   "Test `lsp-sonarlint-test--buf-string-with-overlay-strings' on corner cases"
   (with-temp-buffer
     (unwind-protect
@@ -212,7 +212,8 @@ next str
 
 (ert-deftest lsp-sonarlint-test--display-secondary-messages ()
   "Test that secondary locations are displayed correctly."
-  (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path)))
+  (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path))
+        (lsp-sonarlint--scale-inline-msg-offset nil))
     (with-current-buffer target-file-buf
       (let* ((primary-range (lsp-sonarlint-test-range-make
                              (buffer-string)
@@ -243,10 +244,10 @@ next str
 int divide_seventeen(int param) {
   Redundant branching
   if (param == 0) {
-      Identical code
+     Identical code
     1int a = 0;
   } else {
-      Identical code
+     Identical code
     2int b = 0;
   }
   return 10 / param;
@@ -265,7 +266,8 @@ int divide_seventeen(int param) {
 
 (ert-deftest lsp-sonarlint-test--navigate-to-sec-location ()
   "Test that point moves to locations of selected messages."
-  (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path)))
+  (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path))
+        (lsp-sonarlint--scale-inline-msg-offset nil))
     (with-current-buffer target-file-buf
       (let* ((primary-range (lsp-sonarlint-test-range-make
                              (buffer-string)
@@ -300,7 +302,8 @@ int divide_seventeen(int param) {
 
 (ert-deftest lsp-sonarlint-test--display-execution-flow ()
   "Test that flow steps are displayed correctly and in order."
-  (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path)))
+  (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path))
+        (lsp-sonarlint--scale-inline-msg-offset nil))
     (with-current-buffer target-file-buf
       (let* ((primary-range (lsp-sonarlint-test-range-make
                              (buffer-string)
@@ -352,15 +355,15 @@ int divide_seventeen(int param) {
                      "
 int divide_seventeen(int param) {
    Taking true branch
-          Evaluating condition
+        Evaluating condition
   3if (1param 2== 0) {
-                  Assuming param is 0
-           Assigning a 0
+               Assuming param is 0
+         Assigning a 0
     int 4a = 0;
   } else {
     int b = 0;
   }
-                Division by 0
+             Division by 0
   return 10 5/ param;
 }
 ")))))
@@ -380,7 +383,8 @@ Some long line with words clearly separated
             `(:message "first"
               :overlay ,(lsp-sonarlint-test--place-overlay
                          "Some long line with words clearly separated"
-                         "^^^^                                       ")))))
+                         "^^^^                                       "))))
+          (lsp-sonarlint--scale-inline-msg-offset nil))
       (unwind-protect
           (progn
             (lsp-sonarlint--add-inline-messages locations)
@@ -406,7 +410,8 @@ Some long line with words clearly separated
             `(:message "second"
               :overlay ,(lsp-sonarlint-test--place-overlay
                          "Some long line with words clearly separated"
-                         "^^^^                                       ")))))
+                         "^^^^                                       "))))
+          (lsp-sonarlint--scale-inline-msg-offset nil))
       (unwind-protect
           (progn
             (lsp-sonarlint--add-inline-messages locations)
@@ -441,15 +446,16 @@ Some long line with words clearly separated
             `(:message "fourth"
               :overlay ,(lsp-sonarlint-test--place-overlay
                          "Some long line with words clearly separated"
-                         "                                  ^        ")))))
+                         "                                  ^        "))))
+          (lsp-sonarlint--scale-inline-msg-offset nil))
       (unwind-protect
           (progn
             (lsp-sonarlint--add-inline-messages locations)
             (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
                            "
-first                                     fourth
+first                             fourth
 Some long line with words clearly separated
-            third               second
+          third           second
 ")))
           (remove-overlays)))))
 
