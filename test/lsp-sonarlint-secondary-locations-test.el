@@ -142,8 +142,8 @@ SonarLint LSP server."
                                 (or (< pos1 pos2)
                                     ;; before-string is inserted before after-string
                                     (and (= pos1 pos2)
-                                         (plist-member str1 'before-string)
-                                         (not (plist-member str2 'before-string)))))))))
+                                         (plist-member str1 'after-string)
+                                         (not (plist-member str2 'after-string)))))))))
     (dolist (str all-strings)
       (let ((pos (plist-get str :pos)))
         (push (buffer-substring-no-properties last-pos pos) pieces)
@@ -154,6 +154,64 @@ SonarLint LSP server."
         (setq last-pos pos)))
     (concat (string-join (nreverse pieces))
             (buffer-substring-no-properties last-pos (point-max)))))
+
+(defun lsp-sonarlint-test--place-overlay (line marker)
+  "Add overlay at LINE covering chars pointed to by MARKER in current buffer."
+  (let* ((range (lsp-sonarlint-test-range-make (buffer-string) line marker))
+         (line (plist-get range :line))
+         (from (plist-get range :from))
+         (to (plist-get range :to)))
+    (save-excursion
+      (goto-char (point-min))
+      (forward-line (- line 1))
+      (message "addding overlay from %s to %s"
+               (+ from (line-beginning-position))
+               (+ to (line-beginning-position)))
+      (make-overlay (+ from (line-beginning-position))
+                    (+ to (line-beginning-position))
+                    (current-buffer)))))
+
+(ert-deftest lsp-sonarlint-test--overlays-string ()
+  "Test `lsp-sonarlint-test--buf-string-with-overlay-strings' on corner cases"
+  (with-temp-buffer
+    (unwind-protect
+        (progn
+          (insert "
+Some string here
+")
+          (overlay-put (lsp-sonarlint-test--place-overlay
+                        "Some string here"
+                        "^^^^            ")
+                       'before-string
+                       "Heho")
+          (overlay-put (lsp-sonarlint-test--place-overlay
+                        "Some string here"
+                        "^^^^            ")
+                       'after-string
+                       "after")
+          (overlay-put (lsp-sonarlint-test--place-overlay
+                        "Some string here"
+                        "    ^           ")
+                       'before-string
+                       "bef1")
+          (overlay-put (lsp-sonarlint-test--place-overlay
+                        "Some string here"
+                        "    ^           ")
+                       'after-string
+                       "aft1")
+          (overlay-put (lsp-sonarlint-test--place-overlay
+                        "Some string here"
+                        "            ^^^^")
+                       'after-string
+                       "
+next str")
+          (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
+                         "
+HehoSomeafterbef1 aft1string here
+next str
+"))
+          )
+      (remove-overlays))))
 
 (ert-deftest lsp-sonarlint-test--display-secondary-messages ()
   "Test that secondary locations are displayed correctly."
