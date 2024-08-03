@@ -253,6 +253,51 @@ int divide_seventeen(int param) {
 }
 ")))))
 
+(defun lsp-sonarlint-test--select-message (msg)
+  "Select the step with message MSG in the SonarLint secondary messages buffer."
+  (with-current-buffer lsp-sonarlint--secondary-messages-buffer-name
+      (goto-char (point-min))
+      (search-forward msg)
+      ;; Deliberately using interactive functions here to trigger line-move
+      ;; hooks
+      (previous-line)
+      (next-line)))
+
+(ert-deftest lsp-sonarlint-test--navigate-to-sec-location ()
+  "Test that point moves to locations of selected messages."
+  (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path)))
+    (with-current-buffer target-file-buf
+      (let* ((primary-range (lsp-sonarlint-test-range-make
+                             (buffer-string)
+                             "  if (param == 0) {"
+                             "  ^^               "))
+             (primary-loc `(:message "Redundant branching" :range ,primary-range))
+             (secondary-range1
+              (lsp-sonarlint-test-range-make (buffer-string)
+                                             "    int a = 0;"
+                                             "    ^^^^^^^^^^"))
+             (sec-flow1 `((:message "Code A" :range ,secondary-range1)))
+             (secondary-range2
+              (lsp-sonarlint-test-range-make (buffer-string)
+                                             "    int b = 0;"
+                                             "    ^^^^^^^^^^"))
+             (sec-flow2 `((:message "Code B" :range ,secondary-range2)))
+             (command (lsp-sonarlint-test--secloc-command
+                       primary-loc (list sec-flow1 sec-flow2))))
+        (lsp-sonarlint--show-all-locations command)))
+    (with-current-buffer target-file-buf
+      (goto-char (point-min)))
+    (lsp-sonarlint-test--select-message "Code A")
+    (with-current-buffer target-file-buf
+      (should (equal (buffer-substring-no-properties (line-beginning-position)
+                                                     (line-end-position))
+                     "    int a = 0;")))
+    (lsp-sonarlint-test--select-message "Code B")
+    (with-current-buffer target-file-buf
+      (should (equal (buffer-substring-no-properties (line-beginning-position)
+                                                     (line-end-position))
+                     "    int b = 0;")))))
+
 (ert-deftest lsp-sonarlint-test--display-execution-flow ()
   "Test that flow steps are displayed correctly and in order."
   (let ((target-file-buf (find-file-noselect lsp-sonarlint-test--file-path)))
