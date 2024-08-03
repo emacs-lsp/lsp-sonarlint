@@ -164,9 +164,6 @@ SonarLint LSP server."
     (save-excursion
       (goto-char (point-min))
       (forward-line (- line 1))
-      (message "addding overlay from %s to %s"
-               (+ from (line-beginning-position))
-               (+ to (line-beginning-position)))
       (make-overlay (+ from (line-beginning-position))
                     (+ to (line-beginning-position))
                     (current-buffer)))))
@@ -292,7 +289,6 @@ int divide_seventeen(int param) {
                                                  "      ^^^^^^^^^^   "))))
              (command (lsp-sonarlint-test--secloc-command
                        primary-loc (list flow))))
-        (message "cmd : %s" command)
         (lsp-sonarlint--show-all-locations command)))
     (with-current-buffer lsp-sonarlint--secondary-messages-buffer-name
       (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
@@ -323,6 +319,94 @@ int divide_seventeen(int param) {
   return 10 5/ param;
 }
 ")))))
+
+(ert-deftest lsp-sonarlint-test--add-inline-messages-deduplicate ()
+  "`lsp-sonarlint--add-inline-messages' deduplicates messages."
+  (with-temp-buffer
+    (insert "
+Some long line with words clearly separated
+")
+    (let ((locations
+           (list
+            `(:message "first"
+              :overlay ,(lsp-sonarlint-test--place-overlay
+                         "Some long line with words clearly separated"
+                         "^^^^                                       "))
+            `(:message "first"
+              :overlay ,(lsp-sonarlint-test--place-overlay
+                         "Some long line with words clearly separated"
+                         "^^^^                                       ")))))
+      (unwind-protect
+          (progn
+            (lsp-sonarlint--add-inline-messages locations)
+            (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
+                           "
+first
+Some long line with words clearly separated
+")))
+          (remove-overlays)))))
+
+(ert-deftest lsp-sonarlint-test--add-inline-messages-both-sides ()
+  "`lsp-sonarlint--add-inline-messages' places messages on both sides of a line."
+  (with-temp-buffer
+    (insert "
+Some long line with words clearly separated
+")
+    (let ((locations
+           (list
+            `(:message "first"
+              :overlay ,(lsp-sonarlint-test--place-overlay
+                         "Some long line with words clearly separated"
+                         "^^^^                                       "))
+            `(:message "second"
+              :overlay ,(lsp-sonarlint-test--place-overlay
+                         "Some long line with words clearly separated"
+                         "^^^^                                       ")))))
+      (unwind-protect
+          (progn
+            (lsp-sonarlint--add-inline-messages locations)
+            (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
+                           "
+second
+Some long line with words clearly separated
+first
+")))
+          (remove-overlays)))))
+
+(ert-deftest lsp-sonarlint-test--add-inline-messages-combine ()
+  "`lsp-sonarlint--add-inline-messages' combines messages pairwise."
+  (with-temp-buffer
+    (insert "
+Some long line with words clearly separated
+")
+    (let ((locations
+           (list
+            `(:message "first"
+              :overlay ,(lsp-sonarlint-test--place-overlay
+                         "Some long line with words clearly separated"
+                         "^^^^                                       "))
+            `(:message "second"
+              :overlay ,(lsp-sonarlint-test--place-overlay
+                         "Some long line with words clearly separated"
+                         "                          ^^^^^^^          "))
+            `(:message "third"
+              :overlay ,(lsp-sonarlint-test--place-overlay
+                         "Some long line with words clearly separated"
+                         "          ^^^^                             "))
+            `(:message "fourth"
+              :overlay ,(lsp-sonarlint-test--place-overlay
+                         "Some long line with words clearly separated"
+                         "                                  ^        ")))))
+      (unwind-protect
+          (progn
+            (lsp-sonarlint--add-inline-messages locations)
+            (should (equal (lsp-sonarlint-test--buf-string-with-overlay-strings)
+                           "
+first                                     fourth
+Some long line with words clearly separated
+            third               second
+")))
+          (remove-overlays)))))
 
 
 ;;; lsp-sonarlint-secondar-locations-test.el ends here
