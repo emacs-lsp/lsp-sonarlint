@@ -250,7 +250,14 @@ temporary buffer."
           (insert rule-body-title)
           (insert "\n")
           (insert rule-body-content))))
-    (shr-render-buffer (current-buffer))))
+    (with-current-buffer (get-buffer-create "*html*")
+                          (when buffer-read-only
+                            (view-mode-exit)))
+    (shr-render-buffer (current-buffer))
+    (if (not buffer-read-only)
+        (view-mode-enter))
+    (local-set-key (kbd "q") 'quit-window)
+    (switch-to-buffer (current-buffer))))
 
 (defun lsp-sonarlint-server-start-fun (port)
   "Start lsp-sonarlint in TCP mode listening to port PORT."
