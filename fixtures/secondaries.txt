@@ -1,0 +1,9 @@
+
+int divide_seventeen(int param) {
+  if (param == 0) {
+    int a = 0;
+  } else {
+    int b = 0;
+  }
+  return 10 / param;
+}
