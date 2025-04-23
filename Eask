@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "lsp-sonarlint"
          "0.0.1"
          "Emacs SonarLint lsp client")
