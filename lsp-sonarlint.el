@@ -37,6 +37,7 @@
 (require 'cus-edit)
 (require 'ht)
 (require 'shr)
+(require 'hl-line)
 
 (defgroup lsp-sonarlint nil
   "SonarLint lsp server group"
@@ -322,7 +323,391 @@ See `lsp-sonarlint-analyze-folder' to see which files are ignored."
                         ("filePath" file)))
                      utf8-filenames))))))
 
-(defvar lsp-sonarlint--action-handlers '())
+(defvar lsp-sonarlint--secondary-locations-overlays nil
+  "List of overlays highlighting secondary locations.")
+
+(defface lsp-sonarlint--step-marker '((((class color) (background light))
+                                       (:weight bold
+                                       :box (:line-width (2 . -2)
+                                             :color "pink"
+                                             :style released-button)
+                                       :background "dark red"
+                                       :foreground "white")))
+  "Face used for the little markers on the side of each secondary step.")
+
+(defface lsp-sonarlint-secondary-location-face
+  '((((class color) (background light))
+     (:background "wheat2"))
+    (((class color) (background dark))
+     (:background "gray7"))
+    (t :inverse-video t))
+  "Face used for the secondary locations of a SonarLint issue.")
+
+
+(defface lsp-sonarlint-highlighted-secondary-face
+  '((((class color) (background light))
+     (:box (:line-width -1 :color red)
+      :background "yellow"))
+    (((class color) (background dark))
+     (:box (:line-width -1 :color red)
+      :background "blue3"))
+    (t :inverse-video t))
+  "Face used for the highlighted secondary location of a SonarLint issue.")
+
+(defface lsp-sonarlint-primary-message-face
+  '((t :inherit 'lsp-face-semhl-keyword))
+  "Face used for the primary message in the list of secondary messages.")
+
+(defface lsp-sonarlint-embedded-msg-face
+  '((t :italic t :height 0.8))
+  "Face used for the in-line secondary messages.")
+
+(defun lsp-sonarlint--get-range-positions (range)
+  "Convert the RANGE hash table from SonarLint to a plist with positions."
+  (let ((start-line (1- (ht-get range "startLine")))
+        (start-col (ht-get range "startLineOffset"))
+        (end-line (1- (ht-get range "endLine")))
+        (end-col (ht-get range "endLineOffset")))
+    `(:begin ,(lsp--line-character-to-point start-line start-col)
+      :end ,(lsp--line-character-to-point end-line end-col))))
+
+(defun lsp-sonarlint--make-overlay-between (begin-end-positions)
+  "Create an overlay between BEGIN-END-POSITIONS.
+
+BEGIN-END-POSITIONS is a plist with :begin and :end positions."
+  (let* ((start-pos (plist-get begin-end-positions :begin))
+         (end-pos (plist-get begin-end-positions :end))
+         (overlay (make-overlay start-pos end-pos (current-buffer))))
+    (push overlay lsp-sonarlint--secondary-locations-overlays)
+    overlay))
+
+(defun lsp-sonarlint--add-number-marker (overlay num)
+  "Add a prefix marker NUM to OVERLAY."
+  (overlay-put overlay 'before-string
+               (propertize (number-to-string num)
+                           'face 'lsp-sonarlint--step-marker)))
+
+(defun lsp-sonarlint--make-full-line-overlay (line)
+  "Create an overlay covering entire LINE."
+  (save-excursion
+    (goto-char (point-min))
+    (forward-line (- line 1))
+    (lsp-sonarlint--make-overlay-between `(:begin ,(line-beginning-position)
+                                           :end ,(line-end-position)))))
+
+(defun lsp-sonarlint--get-column (pos)
+  "Get the column of the point position POS."
+  (save-excursion
+    (goto-char pos)
+    (current-column)))
+
+(defun lsp-sonarlint--procure-overlays-for-secondary-locations (flows)
+  "Create overlays for secondary locations in FLOWS.
+
+Returns a list of plists with the overlay, step number, and message."
+  (let ((step-num 0))
+    (apply
+     #'append
+     (seq-map
+      (lambda (flow)
+        ;; By SonarLint convention in which the execution flow leading to a
+        ;; data-flow issue is listed in reverse order. `seq-reverse' lets us
+        ;; display the execution flow in natural order.
+        (let ((locations (seq-reverse (ht-get flow "locations"))))
+          (seq-map
+           (lambda (location)
+             (setq step-num (1+ step-num))
+             (let* ((range-ht (ht-get location "textRange"))
+                    (range (lsp-sonarlint--get-range-positions range-ht))
+                    (overlay (lsp-sonarlint--make-overlay-between range))
+                    (message (ht-get location "message")))
+               (overlay-put overlay 'face 'lsp-sonarlint-secondary-location-face)
+               (lsp-sonarlint--add-number-marker overlay step-num)
+               `(:overlay ,overlay :step-num ,step-num :message ,message)))
+           locations)))
+      flows))))
+
+(defun lsp-sonarlint--procure-overlay-for-primary-location (action-args)
+  "Parse ACTION-ARGS for the primary location and  message and place an overlay."
+  (let* ((message (ht-get action-args "message"))
+         (range-ht (ht-get action-args "textRange"))
+         (range (lsp-sonarlint--get-range-positions range-ht))
+         (overlay (lsp-sonarlint--make-overlay-between range)))
+    `(:overlay ,overlay :message ,message)))
+
+(defconst lsp-sonarlint--secondary-messages-buffer-name "*SonarLint secondary locations*"
+  "Name of the buffer where messages for secondary locations are displayed.")
+
+(defun lsp-sonarlint--remove-secondary-loc-highlights ()
+  "Remove all overlays highlighting secondary locations."
+  (mapc #'delete-overlay lsp-sonarlint--secondary-locations-overlays)
+  (setq lsp-sonarlint--secondary-locations-overlays nil))
+
+(defun lsp-sonarlint--on-quit-window ()
+  "Remove locations' overlays when the secondary-messages window is closed."
+  (when (string-equal (buffer-name) lsp-sonarlint--secondary-messages-buffer-name)
+    (lsp-sonarlint--remove-advices)
+    (lsp-sonarlint--remove-secondary-loc-highlights)))
+
+(defun lsp-sonarlint--remove-advices ()
+  "Remove advices added to `line-move' and `mouse-set-point'."
+    (advice-remove 'line-move #'lsp-sonarlint--on-line-move)
+    (advice-remove 'mouse-set-point #'lsp-sonarlint--on-line-move)
+    (advice-remove 'kill-buffer #'lsp-sonarlint--on-kill-buffer))
+
+(defvar lsp-sonarlint--previously-focused-overlays nil
+  "The list of overlays that was previously focused.")
+
+(defun lsp-sonarlint--unfocus-overlays ()
+  "Unfocus the previously focused overlays."
+  (dolist (ov lsp-sonarlint--previously-focused-overlays)
+    (overlay-put ov 'face 'lsp-sonarlint-secondary-location-face))
+  (setq lsp-sonarlint--previously-focused-overlays nil))
+
+(defun lsp-sonarlint--highlight-target (overlay)
+  "Highlight OVERLAY."
+  (lsp-sonarlint--unfocus-overlays)
+  (overlay-put overlay 'face 'lsp-sonarlint-highlighted-secondary-face)
+  (push overlay lsp-sonarlint--previously-focused-overlays))
+
+(defun lsp-sonarlint--focus-on-target (overlay)
+  "Put point to OVERLAY and make it visible in another window."
+  (when-let ((target-buffer (overlay-buffer overlay))
+             (prev-buffer (current-buffer)))
+    (switch-to-buffer-other-window target-buffer)
+    (goto-char (overlay-start overlay))
+    (hl-line-highlight) ; make sure the line highlighting is updated
+    (switch-to-buffer-other-window prev-buffer)))
+
+(defvar lsp-sonarlint--original-buffer nil
+  "The buffer with code and SonarLint issues.
+
+Useful when exploring secondary locations, which uses an auxiliary buffer.")
+
+(defun lsp-sonarlint--on-line-move (&rest _args)
+  "Highlight the current line in the secondary locations buffer."
+  (when (string-equal (buffer-name) lsp-sonarlint--secondary-messages-buffer-name)
+    (let ((focus-overlay nil))
+      (mapc (lambda (ovl) (when (overlay-get ovl 'focus-location)
+                       (setq focus-overlay (overlay-get ovl 'focus-location))))
+            (overlays-at (point)))
+      (when focus-overlay
+        (lsp-sonarlint--focus-on-target focus-overlay)
+        (lsp-sonarlint--highlight-target focus-overlay))))
+  (when (eq (current-buffer) lsp-sonarlint--original-buffer)
+    (when-let* ((focus-overlay (seq-find (lambda (ovl) (overlay-get ovl 'lsp-sonarlint--message-overlay))
+                                         (overlays-at (- (point) 1) t)))
+                (message-overlay (overlay-get focus-overlay 'lsp-sonarlint--message-overlay)))
+      (lsp-sonarlint--focus-on-target message-overlay)
+      (lsp-sonarlint--highlight-target message-overlay)
+      (hl-line-highlight))))
+
+
+(defun lsp-sonarlint--on-kill-buffer (&rest _args)
+  "Remove sec-locations' highlights and advices when the buffer is killed."
+  (lsp-sonarlint--on-quit-window))
+
+(defun lsp-sonarlint--add-message-entry (loc-message)
+  "Add a new line with message from LOC-MESSAGE.
+
+Should be called on an empty line.
+Returns an overlay placed across the line that has the `focus-location'
+pointing to the `:overlay' from LOC-MESSAGE."
+  (insert (plist-get loc-message :message))
+  (let ((overlay (lsp-sonarlint--make-overlay-between
+                  `(:begin ,(line-beginning-position)
+                    :end ,(line-end-position))))
+        (focus-overlay (plist-get loc-message :overlay)))
+    (overlay-put overlay 'focus-location focus-overlay)
+    (overlay-put focus-overlay 'lsp-sonarlint--message-overlay overlay)
+    overlay))
+
+(defun lsp-sonarlint--extract-located-messages (locations)
+  "Group messages from LOCATIONS by their coordinates."
+  (let ((line-to-msg (make-hash-table :test #'equal)))
+    (mapc (lambda (location)
+            (let* ((precise-overlay (plist-get location :overlay))
+                   (message-offset (lsp-sonarlint--get-column (overlay-start precise-overlay)))
+                   (line (line-number-at-pos (overlay-start precise-overlay))))
+              (push `(:offset ,message-offset ,@location)
+                    (gethash line line-to-msg))))
+          locations)
+    line-to-msg))
+
+(defun lsp-sonarlint--deduplicate (sorted-list test)
+  "Remove duplicate elements (according to TEST) from sorted SORTED-LIST."
+  (let ((result '())
+        (last-element nil))
+    (dolist (element sorted-list (nreverse result))
+      (unless (funcall test element last-element)
+        (push element result)
+        (setq last-element element)))))
+
+(defun lsp-sonarlint--combine (messages-with-offsets)
+  "Combine MESSAGES-WITH-OFFSETS that don't overlap into single line.
+
+MESSAGES-WITH-OFFSETS must be sorted by offset."
+  (let ((result '())
+        (reversed (reverse messages-with-offsets)))
+    (dolist (msg-off messages-with-offsets (nreverse result))
+      (when-let* ((right-most (car reversed))
+                  (right-offset (plist-get right-most :offset))
+                  (my-offset (plist-get msg-off :offset))
+                  (my-message (plist-get msg-off :message))
+                  (gap (- right-offset (+ my-offset (length my-message)))))
+        (unless (< right-offset my-offset) ; this element is already combined
+          (if (<= gap 3) ;; too close or overlap
+              (push msg-off result)
+            (setf (plist-get msg-off :message)
+                  (concat my-message
+                          (make-string gap ?\s)
+                          (plist-get right-most :message)))
+            (pop reversed)
+            (push msg-off result)))))))
+
+(defun lsp-sonarlint--count-digits (num)
+  "Count digits in decimal representation of the NUM integer."
+  (length (number-to-string num)))
+
+(defun lsp-sonarlint--adjust-offsets (messages-with-offsets)
+  "Shift offsets in MESSAGES-WITH-OFFSETS to account for number labels.
+
+MESSAGES-WITH-OFFSETS must be sorted."
+  (let ((accumulated-adjustment 0))
+    (mapcar (lambda (msg-with-offset)
+              (let ((increment
+                     (if-let ((step-num (plist-get
+                                         msg-with-offset
+                                         :step-num)))
+                         (lsp-sonarlint--count-digits step-num)
+                       0)))
+                (setq accumulated-adjustment (+ accumulated-adjustment increment))
+                (setf (plist-get msg-with-offset :offset)
+                      (+ accumulated-adjustment
+                         (plist-get msg-with-offset :offset)))
+                msg-with-offset))
+            messages-with-offsets)))
+
+(defcustom lsp-sonarlint--scale-inline-msg-offset t
+  "Whether to scale the offset for inline messages (code-lens style).
+
+Usually these messages (including their whitespace offset) are
+printed with smaller font, so they need adjustment to account for
+smaller size of the space character.
+
+- Set to nil if it causes problems.
+- Set to a floating-point number if you want to adjust this factor.
+- If t it will deduce the scaling factor
+  from the `lsp-sonarlint-embedded-msg-face' height."
+  :type '(choice
+          (const :tag "Disable" nil)
+          (integer :tag "Factor")
+          (const :tag "Auto" t)))
+
+(defun lsp-sonarlint--scale-offset (offset)
+  "Adjust OFFSET preserving column position with smaller font."
+  (if lsp-sonarlint--scale-inline-msg-offset
+      (if (numberp lsp-sonarlint--scale-inline-msg-offset)
+          (floor (* lsp-sonarlint--scale-inline-msg-offset offset))
+        (let ((msg-height (face-attribute 'lsp-sonarlint-embedded-msg-face :height nil 'default))
+              (default-height (face-attribute 'default :height)))
+          (/ (* offset
+                default-height)
+             msg-height)))
+    offset))
+
+(defun lsp-sonarlint--scale-msg-lens-offset (msg-with-offset)
+  "Adjust offset in MSG-WITH-OFFSET preserving column with smaller font."
+  (setf (plist-get msg-with-offset :offset)
+        (lsp-sonarlint--scale-offset (plist-get msg-with-offset :offset)))
+  msg-with-offset)
+
+(defun lsp-sonarlint--process-offsets (messages-with-offsets)
+  "Sort, deduplicate, adjust, and combine MESSAGES-WITH-OFFSETS.
+
+Sort them in increasing order, remove duplicate messages with identical offsets,
+adjust offsets to account for the number labels prepended to each location,
+and combine non-overlapping messages toreduce the number of lines."
+  (let* ((sorted (sort messages-with-offsets (lambda (msg-off1 msg-off2)
+                                               (< (plist-get msg-off1 :offset)
+                                                  (plist-get msg-off2 :offset)))))
+         (deduplicated (lsp-sonarlint--deduplicate
+                        sorted
+                        (lambda (msg-off1 msg-off2) (and (equal (plist-get msg-off1 :offset)
+                                                           (plist-get msg-off2 :offset))
+                                                    (equal (plist-get msg-off1 :message)
+                                                           (plist-get msg-off2 :message))))))
+         (adjusted (lsp-sonarlint--adjust-offsets deduplicated))
+         ;; Should scale after adjusting, because adjustment is done
+         ;; in terms of the default font
+         (scaled (mapcar #'lsp-sonarlint--scale-msg-lens-offset adjusted)))
+    ;; Should combine after scaling to also scale the potential gaps between
+    ;; combined messages properly
+    (lsp-sonarlint--combine scaled)))
+
+(defun lsp-sonarlint--concat-msg-lines (msg-offsets)
+  "Combine the list of MSG-OFFSETS into a single string."
+  (string-join
+   (mapcar (lambda (msg-offset)
+             (concat (make-string (plist-get msg-offset :offset) ?\s)
+                     (plist-get msg-offset :message)))
+           msg-offsets)
+   "\n"))
+
+(defun lsp-sonarlint--add-inline-messages (locations)
+  "Add lens-style in-line messages for LOCATIONS."
+  (maphash (lambda (line messages)
+             (let* ((adjusted-messages
+                     (lsp-sonarlint--process-offsets messages))
+                    (overlay (lsp-sonarlint--make-full-line-overlay line))
+                    (prefix-count (/ (1+ (length adjusted-messages)) 2))
+                    (prefix-msgs (seq-take adjusted-messages prefix-count))
+                    (postfix-msgs (seq-drop adjusted-messages prefix-count)))
+               (when prefix-msgs
+                 (overlay-put overlay 'before-string
+                              (propertize (concat (lsp-sonarlint--concat-msg-lines prefix-msgs)
+                                                  "\n")
+                                          'face 'lsp-sonarlint-embedded-msg-face)))
+               (when postfix-msgs
+                 (overlay-put overlay 'after-string
+                              (propertize (concat "\n"
+                                                  (lsp-sonarlint--concat-msg-lines postfix-msgs))
+                                          'face 'lsp-sonarlint-embedded-msg-face)))))
+           (lsp-sonarlint--extract-located-messages locations)))
+
+(defun lsp-sonarlint--show-all-locations (command)
+  "Show all secondary locations listed in COMMAND for the focused issue."
+  (lsp-sonarlint--remove-secondary-loc-highlights)
+  (let* ((arguments (seq-first (ht-get command "arguments")))
+         (flows (ht-get arguments "flows")))
+    (let ((locations (lsp-sonarlint--procure-overlays-for-secondary-locations flows))
+          (primary (lsp-sonarlint--procure-overlay-for-primary-location arguments)))
+      (setq lsp-sonarlint--original-buffer (current-buffer))
+      (switch-to-buffer-other-window lsp-sonarlint--secondary-messages-buffer-name)
+      (fundamental-mode)
+      (setq buffer-read-only nil)
+      (erase-buffer)
+
+      (let ((prim-overlay (lsp-sonarlint--add-message-entry primary)))
+        (overlay-put prim-overlay 'face 'lsp-sonarlint-primary-message-face))
+
+      (advice-add 'line-move :after #'lsp-sonarlint--on-line-move)
+      (advice-add 'mouse-set-point :after #'lsp-sonarlint--on-line-move)
+      (advice-add 'kill-buffer :after #'lsp-sonarlint--on-kill-buffer)
+
+      (dolist (location locations)
+        (insert "\n")
+        (let ((overlay (lsp-sonarlint--add-message-entry location)))
+          (lsp-sonarlint--add-number-marker overlay (plist-get location :step-num))))
+      (with-current-buffer lsp-sonarlint--original-buffer
+        (lsp-sonarlint--add-inline-messages (cons primary locations)))
+      (goto-char (point-min))
+      (tabulated-list-mode)
+      (setq-local cursor-type nil))))
+
+(defvar lsp-sonarlint--action-handlers
+  (lsp-ht
+   ("SonarLint.ShowAllLocations" #'lsp-sonarlint--show-all-locations)))
 
 (lsp-register-custom-settings
  '(("sonarlint.disableTelemetry" lsp-sonarlint-disable-telemetry)
@@ -404,11 +789,13 @@ See NOTIFICATION-HANDLERS in lsp--client in lsp-mode.")
   :multi-root t
   :add-on? t
   :server-id 'sonarlint
-  :action-handlers (ht<-alist lsp-sonarlint--action-handlers)
+  :action-handlers lsp-sonarlint--action-handlers
   :initialization-options (lambda ()
-			    (list
-			     :productKey "emacs"
-			     :productName "Emacs"))
+                            (list
+                             :productKey "emacs"
+                             :productName "Emacs"))
+  :after-open-fn (lambda ()
+                   (add-hook 'quit-window-hook #'lsp-sonarlint--on-quit-window))
   :initialized-fn (lambda (workspace)
                     (with-lsp-workspace workspace
                       (lsp--set-configuration
