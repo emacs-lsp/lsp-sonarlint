@@ -1,13 +1,14 @@
 ;;; lsp-sonarlint.el --- Emacs SonarLint lsp client              -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2020  Fermin Munoz
+;; Copyright (C) 2020-2026  emacs-lsp maintainers
 
 ;; Author: Fermin MF <fmfs@posteo.net>
 ;; Created: 13 Jun 2020
 ;; Version: 0.0.1
 ;; Keywords: languages, tools, php, javascript, typescript, go, xml, html, java, python
 ;; URL: https://github.com/emacs-lsp/lsp-sonarlint
-;; Package-Requires: ((emacs "28.1") (dash "2.12.0") (lsp-mode "6.3") (ht "2.3"))
+;; Package-Requires: ((emacs "29.1") (dash "2.12.0") (lsp-mode "6.3") (ht "2.3"))
 ;; License: GPL-3.0-or-later
 
 ;; This program is free software; you can redistribute it and/or modify
